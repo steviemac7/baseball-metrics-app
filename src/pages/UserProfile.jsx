@@ -3,7 +3,8 @@ import { useParams, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { dataService } from '../services/dataService';
 import TrendChart from '../components/TrendChart';
-import { Plus, Table, TrendingUp, Trash2 } from 'lucide-react';
+import DistanceCalculator from '../components/DistanceCalculator';
+import { Plus, Table, TrendingUp, Trash2, Ruler } from 'lucide-react';
 import clsx from 'clsx';
 import { METRIC_GROUPS } from '../utils/constants';
 
@@ -18,6 +19,8 @@ const UserProfile = () => {
 
     // Input state
     const [inputState, setInputState] = useState({});
+    const [showGpsModal, setShowGpsModal] = useState(false);
+    const [gpsTargetMetric, setGpsTargetMetric] = useState(null);
 
     useEffect(() => {
         loadData();
@@ -141,6 +144,19 @@ const UserProfile = () => {
                     value={inputState[metric.id] || ''}
                     onChange={(e) => setInputState({ ...inputState, [metric.id]: e.target.value })}
                 />
+
+                {metric.id === 'dist_tee' && (
+                    <button
+                        onClick={() => {
+                            setGpsTargetMetric(metric.id);
+                            setShowGpsModal(true);
+                        }}
+                        className="p-1 px-2 bg-gray-700 border border-gray-600 text-blue-400 hover:bg-gray-600 rounded flex items-center"
+                        title="Use GPS Rangefinder"
+                    >
+                        <Ruler size={16} />
+                    </button>
+                )}
                 <button
                     onClick={async () => {
                         const date = document.getElementById(`date-${metric.id}`).value;
@@ -297,6 +313,19 @@ const UserProfile = () => {
                     </div>
                 )}
             </div>
+
+            {showGpsModal && (
+                <DistanceCalculator
+                    onClose={() => setShowGpsModal(false)}
+                    onSelect={(dist) => {
+                        if (gpsTargetMetric) {
+                            setInputState({ ...inputState, [gpsTargetMetric]: dist });
+                        }
+                        setShowGpsModal(false);
+                        setGpsTargetMetric(null);
+                    }}
+                />
+            )}
         </div>
     );
 };

@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, RefreshCw, Ruler } from 'lucide-react';
 
-const DistanceCalculator = ({ onClose }) => {
+const DistanceCalculator = ({ onClose, onSelect }) => {
     const [currentPos, setCurrentPos] = useState(null);
-    const [homePlatePos, setHomePlatePos] = useState(null);
+    const [homePlatePos, setHomePlatePos] = useState(() => {
+        const saved = localStorage.getItem('homePlatePos');
+        return saved ? JSON.parse(saved) : null;
+    });
     const [error, setError] = useState(null);
     const [isAveraging, setIsAveraging] = useState(false);
     const [sampleCount, setSampleCount] = useState(0);
@@ -83,6 +86,7 @@ const DistanceCalculator = ({ onClose }) => {
         };
 
         setHomePlatePos(avgPos);
+        localStorage.setItem('homePlatePos', JSON.stringify(avgPos));
         setIsAveraging(false);
     };
 
@@ -179,6 +183,15 @@ const DistanceCalculator = ({ onClose }) => {
                                 </>
                             )}
                         </button>
+
+                        {onSelect && (
+                            <button
+                                onClick={() => onSelect(parseFloat(distance.toFixed(1)))}
+                                className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-lg flex items-center justify-center transition-all"
+                            >
+                                Use {distance.toFixed(1)} ft
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
