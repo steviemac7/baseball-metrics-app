@@ -45,7 +45,25 @@ const AppRoutes = () => {
 
 import ErrorBoundary from './components/ErrorBoundary';
 
+import { useEffect } from 'react';
+
 function App() {
+  // Warm up GPS on launch
+  useEffect(() => {
+    let watchId;
+    if ('geolocation' in navigator) {
+      // We don't do anything with the data here, just keeping the radio active
+      watchId = navigator.geolocation.watchPosition(
+        () => { },
+        (err) => console.debug('GPS Warmup ignored:', err.message),
+        { enableHighAccuracy: true, maximumAge: 0 }
+      );
+    }
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
   return (
     <ErrorBoundary>
       <AuthProvider>
