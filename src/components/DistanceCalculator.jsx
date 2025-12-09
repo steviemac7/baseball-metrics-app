@@ -125,7 +125,7 @@ const DistanceCalculator = ({ onClose }) => {
                                 <p className="text-xs text-gray-500 uppercase font-semibold">Current Location</p>
                                 {isAveraging ? (
                                     <p className="text-blue-400 text-sm font-bold animate-pulse">
-                                        Calibrating... ({sampleCount} samples)
+                                        Calibrating... ({samples.length} samples)
                                     </p>
                                 ) : currentPos ? (
                                     <p className="text-green-400 text-sm font-mono flex items-center mt-1">
