@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapPin, RefreshCw, Ruler } from 'lucide-react';
 
 const DistanceCalculator = ({ onClose }) => {
@@ -125,7 +125,7 @@ const DistanceCalculator = ({ onClose }) => {
                                 <p className="text-xs text-gray-500 uppercase font-semibold">Current Location</p>
                                 {isAveraging ? (
                                     <p className="text-blue-400 text-sm font-bold animate-pulse">
-                                        Calibrating... ({samples.length} samples)
+                                        Calibrating... ({sampleCount} samples)
                                     </p>
                                 ) : currentPos ? (
                                     <p className="text-green-400 text-sm font-mono flex items-center mt-1">
@@ -157,8 +157,8 @@ const DistanceCalculator = ({ onClose }) => {
                             onClick={startSetHomePlate}
                             disabled={!currentPos || isAveraging}
                             className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center transition-all ${isAveraging
-                                    ? 'bg-blue-600/50 text-blue-200 cursor-wait'
-                                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30'
+                                ? 'bg-blue-600/50 text-blue-200 cursor-wait'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30'
                                 }`}
                         >
                             {isAveraging ? (
