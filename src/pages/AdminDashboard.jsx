@@ -69,7 +69,7 @@ const AdminDashboard = () => {
                         className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg shadow-blue-500/30 transition-all"
                     >
                         <Plus className="w-5 h-5 mr-2" />
-                        Add Athlete
+                        Add New Athlete
                     </button>
                 </div>
             </div>

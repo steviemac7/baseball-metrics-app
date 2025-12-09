@@ -5,46 +5,79 @@ const DistanceCalculator = ({ onClose }) => {
     const [currentPos, setCurrentPos] = useState(null);
     const [homePlatePos, setHomePlatePos] = useState(null);
     const [error, setError] = useState(null);
-    const [watching, setWatching] = useState(true);
+    const [isAveraging, setIsAveraging] = useState(false);
+    const [samples, setSamples] = useState([]);
 
     useEffect(() => {
         let watchId;
-        if (watching) {
-            if (!navigator.geolocation) {
-                setError('Geolocation is not supported by your browser');
-                return;
-            }
-
-            watchId = navigator.geolocation.watchPosition(
-                (position) => {
-                    setCurrentPos({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    });
-                    setError(null);
-                },
-                (err) => {
-                    setError('Unable to retrieve your location. Please allow GPS access.');
-                    console.error(err);
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                }
-            );
+        if (!navigator.geolocation) {
+            setError('Geolocation is not supported by your browser');
+            return;
         }
+
+        watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                const newPos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                };
+
+                setCurrentPos(newPos);
+                setError(null);
+
+                // If averaging, collect samples
+                if (isAveraging) {
+                    setSamples(prev => [...prev, newPos]);
+                }
+            },
+            (err) => {
+                setError('Unable to retrieve your location. Please allow GPS access.');
+                console.error(err);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
 
         return () => {
             if (watchId) navigator.geolocation.clearWatch(watchId);
         };
-    }, [watching]);
+    }, [isAveraging]); // Re-bind isn't strictly necessary but keeps logic clean if methods change
 
-    const setHomePlate = () => {
-        if (currentPos) {
-            setHomePlatePos(currentPos);
+    // Finish averaging after 5 seconds or enough samples
+    useEffect(() => {
+        if (isAveraging && samples.length > 0) {
+            // Stop after 5 seconds
+            const timer = setTimeout(() => {
+                finishAveraging();
+            }, 5000);
+            return () => clearTimeout(timer);
         }
+    }, [isAveraging]);
+
+    const startSetHomePlate = () => {
+        setIsAveraging(true);
+        setSamples([]);
+    };
+
+    const finishAveraging = () => {
+        if (samples.length === 0) return;
+
+        // Calculate average
+        const sumLat = samples.reduce((acc, curr) => acc + curr.lat, 0);
+        const sumLng = samples.reduce((acc, curr) => acc + curr.lng, 0);
+
+        const avgPos = {
+            lat: sumLat / samples.length,
+            lng: sumLng / samples.length,
+            accuracy: samples[samples.length - 1].accuracy // Keep last accuracy for ref
+        };
+
+        setHomePlatePos(avgPos);
+        setIsAveraging(false);
     };
 
     const calculateDistance = (pos1, pos2) => {
@@ -71,7 +104,7 @@ const DistanceCalculator = ({ onClose }) => {
                     <div>
                         <h2 className="text-2xl font-bold text-white flex items-center">
                             <Ruler className="mr-2 text-blue-500" />
-                            Distance Calculator
+                            GPS Rangefinder
                         </h2>
                         <p className="text-gray-400 text-sm mt-1">
                             Set Home Plate, then walk to measure distance.
@@ -90,19 +123,23 @@ const DistanceCalculator = ({ onClose }) => {
                         <div className="bg-gray-700/50 p-4 rounded-lg flex justify-between items-center">
                             <div>
                                 <p className="text-xs text-gray-500 uppercase font-semibold">Current Location</p>
-                                {currentPos ? (
+                                {isAveraging ? (
+                                    <p className="text-blue-400 text-sm font-bold animate-pulse">
+                                        Calibrating... ({samples.length} samples)
+                                    </p>
+                                ) : currentPos ? (
                                     <p className="text-green-400 text-sm font-mono flex items-center mt-1">
                                         <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-                                        Updating... (±{Math.round(currentPos.accuracy * 3.28084)}ft)
+                                        Live (±{Math.round(currentPos.accuracy * 3.28084)}ft)
                                     </p>
                                 ) : (
                                     <p className="text-yellow-500 text-sm">Acquiring signal...</p>
                                 )}
                             </div>
-                            {homePlatePos && (
+                            {homePlatePos && !isAveraging && (
                                 <div className="text-right">
                                     <p className="text-xs text-gray-500 uppercase font-semibold">Home Plate</p>
-                                    <p className="text-white text-sm">Set</p>
+                                    <p className="text-white text-sm">Set (Avg)</p>
                                 </div>
                             )}
                         </div>
@@ -112,17 +149,29 @@ const DistanceCalculator = ({ onClose }) => {
                             <span className="text-6xl font-bold text-white font-mono">
                                 {distance.toFixed(1)}
                             </span>
-                            <span className="text- gray-500 ml-2 text-xl">ft</span>
+                            <span className="text-gray-500 ml-2 text-xl">ft</span>
                         </div>
 
                         {/* Action */}
                         <button
-                            onClick={setHomePlate}
-                            disabled={!currentPos}
-                            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg flex items-center justify-center transition-all"
+                            onClick={startSetHomePlate}
+                            disabled={!currentPos || isAveraging}
+                            className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center transition-all ${isAveraging
+                                    ? 'bg-blue-600/50 text-blue-200 cursor-wait'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30'
+                                }`}
                         >
-                            <MapPin className="mr-2" />
-                            Set Home Plate Here
+                            {isAveraging ? (
+                                <>
+                                    <RefreshCw className="mr-2 animate-spin" />
+                                    Calibrating Home Plate...
+                                </>
+                            ) : (
+                                <>
+                                    <MapPin className="mr-2" />
+                                    {homePlatePos ? 'Reset Home Plate' : 'Set Home Plate'}
+                                </>
+                            )}
                         </button>
                     </div>
                 )}
