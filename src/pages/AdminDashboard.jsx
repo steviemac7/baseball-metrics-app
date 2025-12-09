@@ -22,8 +22,10 @@ const AdminDashboard = () => {
 
     const handleAddUser = async (userData) => {
         try {
+            const tempPassword = "password123";
             await dataService.createUser({
                 ...userData,
+                password: tempPassword,
                 biometrics: {
                     dob: userData.dob,
                     gender: userData.gender,
@@ -33,6 +35,7 @@ const AdminDashboard = () => {
                 }
             });
             loadUsers();
+            alert(`Athlete Profile Created!\n\nEmail: ${userData.email}\nTemporary Password: ${tempPassword}\n\nPlease share these credentials with the athlete.`);
         } catch (error) {
             alert("Error creating user: " + error.message);
         }
