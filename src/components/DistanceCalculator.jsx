@@ -6,7 +6,8 @@ const DistanceCalculator = ({ onClose }) => {
     const [homePlatePos, setHomePlatePos] = useState(null);
     const [error, setError] = useState(null);
     const [isAveraging, setIsAveraging] = useState(false);
-    const [samples, setSamples] = useState([]);
+    const [sampleCount, setSampleCount] = useState(0);
+    const samplesRef = useRef([]);
 
     useEffect(() => {
         let watchId;
@@ -26,9 +27,10 @@ const DistanceCalculator = ({ onClose }) => {
                 setCurrentPos(newPos);
                 setError(null);
 
-                // If averaging, collect samples
+                // If averaging, collect samples in Ref
                 if (isAveraging) {
-                    setSamples(prev => [...prev, newPos]);
+                    samplesRef.current.push(newPos);
+                    setSampleCount(samplesRef.current.length);
                 }
             },
             (err) => {
@@ -45,12 +47,11 @@ const DistanceCalculator = ({ onClose }) => {
         return () => {
             if (watchId) navigator.geolocation.clearWatch(watchId);
         };
-    }, [isAveraging]); // Re-bind isn't strictly necessary but keeps logic clean if methods change
+    }, [isAveraging]);
 
-    // Finish averaging after 5 seconds or enough samples
+    // Finish averaging after 5 seconds
     useEffect(() => {
-        if (isAveraging && samples.length > 0) {
-            // Stop after 5 seconds
+        if (isAveraging) {
             const timer = setTimeout(() => {
                 finishAveraging();
             }, 5000);
@@ -59,21 +60,26 @@ const DistanceCalculator = ({ onClose }) => {
     }, [isAveraging]);
 
     const startSetHomePlate = () => {
+        samplesRef.current = [];
+        setSampleCount(0);
         setIsAveraging(true);
-        setSamples([]);
     };
 
     const finishAveraging = () => {
-        if (samples.length === 0) return;
+        const collectedSamples = samplesRef.current;
+        if (collectedSamples.length === 0) {
+            setIsAveraging(false);
+            return;
+        }
 
         // Calculate average
-        const sumLat = samples.reduce((acc, curr) => acc + curr.lat, 0);
-        const sumLng = samples.reduce((acc, curr) => acc + curr.lng, 0);
+        const sumLat = collectedSamples.reduce((acc, curr) => acc + curr.lat, 0);
+        const sumLng = collectedSamples.reduce((acc, curr) => acc + curr.lng, 0);
 
         const avgPos = {
-            lat: sumLat / samples.length,
-            lng: sumLng / samples.length,
-            accuracy: samples[samples.length - 1].accuracy // Keep last accuracy for ref
+            lat: sumLat / collectedSamples.length,
+            lng: sumLng / collectedSamples.length,
+            accuracy: collectedSamples[collectedSamples.length - 1].accuracy
         };
 
         setHomePlatePos(avgPos);
@@ -125,7 +131,7 @@ const DistanceCalculator = ({ onClose }) => {
                                 <p className="text-xs text-gray-500 uppercase font-semibold">Current Location</p>
                                 {isAveraging ? (
                                     <p className="text-blue-400 text-sm font-bold animate-pulse">
-                                        Calibrating... ({samples.length} samples)
+                                        Calibrating... ({sampleCount} samples)
                                     </p>
                                 ) : currentPos ? (
                                     <p className="text-green-400 text-sm font-mono flex items-center mt-1">
