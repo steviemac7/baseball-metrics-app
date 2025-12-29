@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { METRIC_GROUPS } from '../utils/constants';
 import Stopwatch from '../components/Stopwatch';
-import { ArrowLeft, Save, Calendar, Filter, X, Check, Mic, MicOff, AlertCircle, Timer } from 'lucide-react';
+import DistanceCalculator from '../components/DistanceCalculator';
+import { ArrowLeft, Save, Calendar, Filter, X, Check, Mic, MicOff, AlertCircle, Timer, Ruler } from 'lucide-react';
 
 const BulkMetricEntry = () => {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ const BulkMetricEntry = () => {
     const [values, setValues] = useState({});
     const [saving, setSaving] = useState(false);
     const [isStopwatchOpen, setIsStopwatchOpen] = useState(false);
+    const [isGpsOpen, setIsGpsOpen] = useState(false);
 
     const STOPWATCH_METRICS = [
         'dash_60', 'dash_30', 'home_to_2b', 'steal_2b', // Foot Speed
@@ -382,6 +384,18 @@ const BulkMetricEntry = () => {
                             </button>
                         )}
 
+                        {selectedMetricId === 'dist_tee' && (
+                            <button
+                                onClick={() => setIsGpsOpen(!isGpsOpen)}
+                                className={`p-2 rounded-lg transition-all border ${isGpsOpen
+                                    ? 'bg-blue-600 text-white border-blue-500'
+                                    : 'bg-gray-700 text-blue-400 hover:bg-gray-600 border-blue-500/20'}`}
+                                title="Open GPS Rangefinder"
+                            >
+                                <Ruler className="w-5 h-5" />
+                            </button>
+                        )}
+
                         <button
                             onClick={handleSave}
                             disabled={saving}
@@ -444,6 +458,11 @@ const BulkMetricEntry = () => {
             {isStopwatchOpen && (
                 <div className="mt-8">
                     <Stopwatch onClose={() => setIsStopwatchOpen(false)} embedded={true} />
+                </div>
+            )}
+            {isGpsOpen && (
+                <div className="mt-8">
+                    <DistanceCalculator onClose={() => setIsGpsOpen(false)} embedded={true} />
                 </div>
             )}
         </div>
