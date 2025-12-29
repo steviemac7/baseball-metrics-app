@@ -27,7 +27,9 @@ const SummaryStats = () => {
         minHeight: '', // in inches
         maxHeight: '',
         minWeight: '',
-        maxWeight: ''
+        maxWeight: '',
+        startDate: '',
+        endDate: ''
     });
 
     useEffect(() => {
@@ -38,7 +40,6 @@ const SummaryStats = () => {
             setUsers(allUsers.filter(u => u.role !== 'ADMIN'));
             setMetrics(allMetrics);
         };
-        load();
         load();
     }, []);
 
@@ -73,7 +74,15 @@ const SummaryStats = () => {
         // For each filtered user, get their LATEST value for the selected metric
         const dataPoints = filteredUsers.map(user => {
             const userMetrics = metrics
-                .filter(m => m.userId === user.id && m.metricId === selectedMetricId)
+                .filter(m => {
+                    if (m.userId !== user.id || m.metricId !== selectedMetricId) return false;
+
+                    // Date Range Check
+                    if (filters.startDate && new Date(m.date) < new Date(filters.startDate)) return false;
+                    if (filters.endDate && new Date(m.date) > new Date(filters.endDate)) return false;
+
+                    return true;
+                })
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
 
             const latest = userMetrics[0];
@@ -88,7 +97,7 @@ const SummaryStats = () => {
         dataPoints.sort((a, b) => isTime ? a.value - b.value : b.value - a.value);
 
         return dataPoints;
-    }, [filteredUsers, metrics, selectedMetricId]);
+    }, [filteredUsers, metrics, selectedMetricId, filters.startDate, filters.endDate]);
 
     // Statistics
     const stats = useMemo(() => {
@@ -196,6 +205,27 @@ const SummaryStats = () => {
                         </div>
                     </div>
 
+                    <div className="flex space-x-2">
+                        <div className="flex-1">
+                            <label className="block text-sm text-gray-400 mb-1">Start Date</label>
+                            <input
+                                type="date"
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                                value={filters.startDate}
+                                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm text-gray-400 mb-1">End Date</label>
+                            <input
+                                type="date"
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                                value={filters.endDate}
+                                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
                     {/* More filters could go here (wgt/hgt) */}
                 </div>
             </div>
@@ -244,6 +274,8 @@ const SummaryStats = () => {
                                 <tr>
                                     <th className="px-6 py-3">Rank</th>
                                     <th className="px-6 py-3">Athlete</th>
+                                    <th className="px-6 py-3">Team</th>
+                                    <th className="px-6 py-3">Age</th>
                                     <th className="px-6 py-3 text-right">Value ({selectedMetricDef?.unit})</th>
                                     <th className="px-6 py-3 text-right">Date</th>
                                 </tr>
@@ -254,6 +286,9 @@ const SummaryStats = () => {
                                     const isAdmin = currentUser?.role === 'ADMIN';
                                     const showName = isAdmin || isMe;
 
+                                    const bio = data.user.biometrics || {};
+                                    const age = bio.dob ? new Date().getFullYear() - new Date(bio.dob).getFullYear() : '-';
+
                                     return (
                                         <tr key={data.user.id} className={clsx("transition-colors", isMe ? "bg-blue-500/10 hover:bg-blue-500/20" : "hover:bg-gray-700/30")}>
                                             <td className="px-6 py-4 font-mono text-gray-500">#{idx + 1}</td>
@@ -262,6 +297,8 @@ const SummaryStats = () => {
                                                 {showName ? data.user.name : `Athlete ${idx + 1}`}
                                                 {isMe && <span className="ml-2 text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">You</span>}
                                             </td>
+                                            <td className="px-6 py-4 text-gray-400">{data.user.team || '-'}</td>
+                                            <td className="px-6 py-4 text-gray-400">{age}</td>
                                             <td className="px-6 py-4 text-right text-lg font-bold text-blue-400">
                                                 {data.value}
                                             </td>
