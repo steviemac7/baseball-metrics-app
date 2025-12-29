@@ -87,8 +87,8 @@ const Stopwatch = ({ onClose }) => {
                 <div className="space-y-2">
                     {[0, 1, 2, 3, 4].map((index) => (
                         <div key={index} className={`flex justify-between items-center p-3 rounded-lg border ${finishes[index]
-                                ? 'bg-gray-700/50 border-gray-600'
-                                : 'bg-gray-800/30 border-gray-800 text-gray-600'
+                            ? 'bg-gray-700/50 border-gray-600'
+                            : 'bg-gray-800/30 border-gray-800 text-gray-600'
                             }`}>
                             <span className="font-medium">Athlete {index + 1}</span>
                             <span className={`font-mono font-bold ${finishes[index] ? 'text-white' : ''}`}>
@@ -112,10 +112,10 @@ const Stopwatch = ({ onClose }) => {
                         onClick={handleAction}
                         disabled={finishes.length >= 5}
                         className={`py-3 rounded-xl font-bold text-lg flex items-center justify-center transition-all ${isRunning
-                                ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                                : finishes.length >= 5
-                                    ? 'bg-gray-600 cursor-not-allowed text-gray-400'
-                                    : 'bg-green-600 hover:bg-green-700 text-white'
+                            ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                            : finishes.length >= 5
+                                ? 'bg-gray-600 cursor-not-allowed text-gray-400'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
                             }`}
                     >
                         {isRunning ? (
@@ -123,37 +123,16 @@ const Stopwatch = ({ onClose }) => {
                                 <Flag className="mr-2 w-5 h-5" />
                                 Record Split
                             </>
-                        ) : finishes.length > 0 && finishes.length < 5 ? (
-                            // Resume? No, user said "All athletes start at same time". 
-                            // So if paused explicitly, it's weird. 
-                            // Logic says: "Hitting it again would display time for first... then second".
-                            // So it's mostly running continuously until 5th.
-                            // But if I want to allow start?
-                            // Let's assume once stopped, it's done. 
-                            // Actually, if I stopped manually, maybe reseting is best.
-                            // But my handleAction logic doesn't allow manual stop unless 5 are done.
-                            // Wait, logic: "Hitting start button again would display time for first".
-                            // So start -> running. Click -> split 1. Click -> split 2.
-                            // So IS_RUNNING stays true effectively until 5th.
-                            "Resume" // In case of weird state, but normally unreachable with current logic unless I add Stop button.
-                            // Wait, my logic doesn't have a manual "Stop Race" button other than finishes.length = 5.
-                            // That fits the requirements "calculate and display time for first... again for second".
-                            // So the button always means "Record Next Finish" once started.
-                            // So label should be "Start Race" initially.
+                        ) : (
                             <>
-                            <Play className="mr-2 w-5 h-5" /> 
-                                 Start Race
-                    </>
-                    ) : (
-                    <>
-                        <Play className="mr-2 w-5 h-5" />
-                        Start Race
-                    </>
+                                <Play className="mr-2 w-5 h-5" />
+                                Start Race
+                            </>
                         )}
-                </button>
+                    </button>
+                </div>
             </div>
         </div>
-        </div >
     );
 };
 
