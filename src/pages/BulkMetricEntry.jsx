@@ -107,8 +107,11 @@ const BulkMetricEntry = () => {
 
     const handleVoiceCommand = (transcript) => {
         // Expected format: "Name Value" e.g. "Pat 85" or "Patrick 88.5"
+        // Cleanup: Remove common punctuation that speech reco might add
+        const cleanTranscript = transcript.replace(/[.,;]$/g, '').replace(/,/g, '');
+
         // Regex: Last part matches number (integer or decimal), rest is name
-        const match = transcript.match(/(.*)\s+(\d+(\.\d+)?)$/);
+        const match = cleanTranscript.match(/(.*)\s+(\d+(\.\d+)?)$/);
 
         if (!match) {
             setVoiceFeedback({ type: 'error', message: `Could not parse: "${transcript}"` });
