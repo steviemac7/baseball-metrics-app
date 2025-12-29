@@ -173,6 +173,42 @@ const BulkMetricEntry = () => {
                         </select>
                     </div>
                 </div>
+
+                {/* Team Filter */}
+                <div className="mt-6 pt-6 border-t border-gray-700">
+                    <label className="block text-sm font-medium text-gray-400 mb-3">
+                        Filter by Team
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => setSelectedTeams([])}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${selectedTeams.length === 0
+                                ? 'bg-blue-600 border-blue-600 text-white'
+                                : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500'
+                                }`}
+                        >
+                            All Teams
+                        </button>
+                        {uniqueTeams.map(team => (
+                            <button
+                                key={team}
+                                onClick={() => toggleTeam(team)}
+                                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center ${selectedTeams.includes(team)
+                                    ? 'bg-blue-600 border-blue-600 text-white'
+                                    : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500'
+                                    }`}
+                            >
+                                {selectedTeams.includes(team) && <Check className="w-3 h-3 mr-1" />}
+                                {team}
+                            </button>
+                        ))}
+                    </div>
+                    {selectedTeams.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-2">
+                            Showing {filteredUsers.length} of {allUsers.length} athletes
+                        </p>
+                    )}
+                </div>
             </div>
 
             <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-lg">
