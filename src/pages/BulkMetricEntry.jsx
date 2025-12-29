@@ -245,12 +245,9 @@ const BulkMetricEntry = () => {
         return metric ? metric.unit : '';
     };
 
-    return (
     // Stopwatch Assignment State
     const [assignedSplitMap, setAssignedSplitMap] = useState({}); // { 0: "Name", 1: "Name" }
     const [assigningSplit, setAssigningSplit] = useState(null); // { index: 0, value: 12.34 }
-
-    // ... (existing code)
 
     const handleAssignSplit = (index, value) => {
         if (index === 'RESET') {
