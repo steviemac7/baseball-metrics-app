@@ -204,7 +204,8 @@ const BulkMetricEntry = () => {
 
             // Iterate through all users who have a value entered
             for (const [userId, value] of Object.entries(values)) {
-                if (value && value.trim() !== '') {
+                // Ensure value is handled as a string for validation, but keep original type for saving if needed
+                if (value !== null && value !== undefined && String(value).trim() !== '') {
                     promises.push(dataService.addMetric({
                         userId,
                         date,
