@@ -81,6 +81,7 @@ export const dataService = {
             email: userData.email,
             role: 'USER', // Default role
             name: userData.name,
+            nickname: userData.nickname || '',
             team: userData.team || '',
             biometrics: userData.biometrics || {},
             createdAt: new Date().toISOString()
@@ -89,6 +90,23 @@ export const dataService = {
         await setDoc(doc(db, USERS_COL, uid), newUserProfile);
 
         return { id: uid, ...newUserProfile };
+    },
+
+    updateUser: async (id, userData) => {
+        const docRef = doc(db, USERS_COL, id);
+
+        // Prepare update object
+        // We only allow updating fields present in userData
+        const updates = {};
+        if (userData.name !== undefined) updates.name = userData.name;
+        if (userData.nickname !== undefined) updates.nickname = userData.nickname;
+        if (userData.team !== undefined) updates.team = userData.team;
+        if (userData.biometrics !== undefined) updates.biometrics = userData.biometrics;
+        // Email/Role updates require more care or auth interactions, skipping for this simple edit
+
+        await updateDoc(docRef, updates);
+
+        return { id, ...updates };
     },
 
     updateUserPassword: async (id, newPassword) => {

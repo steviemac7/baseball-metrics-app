@@ -42,7 +42,7 @@ const BulkUserImportModal = ({ isOpen, onClose, onImport }) => {
                 headers.forEach((header, index) => {
                     // Map common CSV headers to our internal field names
                     let key = header;
-                    if (header === 'firstname' || header === 'first name') key = 'name'; // Fallback if they split names, but let's assume 'name' is full name
+                    if (header === 'firstname' || header === 'first name') key = 'name'; // Fallback
                     if (header === 'date of birth') key = 'dob';
                     if (header === 'height(ft)') key = 'heightFt';
                     if (header === 'height(in)') key = 'heightIn';
@@ -55,6 +55,7 @@ const BulkUserImportModal = ({ isOpen, onClose, onImport }) => {
                     users.push({
                         name: user.name,
                         email: user.email,
+                        nickname: user.nickname || '',
                         team: user.team || '',
                         dob: user.dob || '',
                         gender: user.gender || 'Male',
@@ -114,7 +115,7 @@ const BulkUserImportModal = ({ isOpen, onClose, onImport }) => {
                         <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-600 rounded-xl p-8 hover:bg-gray-700/30 transition-colors">
                             <Upload className="w-12 h-12 text-gray-400 mb-4" />
                             <p className="text-gray-300 mb-2">Click or drag CSV file here</p>
-                            <p className="text-gray-500 text-sm mb-6">Format: name, email, team, dob, gender, heightFt, heightIn, weight</p>
+                            <p className="text-gray-500 text-sm mb-6">Format: name, email, nickname, team, dob, gender, heightFt, heightIn, weight</p>
                             <input
                                 type="file"
                                 accept=".csv"

@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-const AddUserModal = ({ isOpen, onClose, onAdd }) => {
+const EditUserModal = ({ isOpen, onClose, onUpdate, user }) => {
     const [formData, setFormData] = useState({
-        email: '',
         name: '',
         nickname: '',
         team: '',
@@ -15,29 +14,39 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
     });
     const [error, setError] = useState('');
 
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                name: user.name || '',
+                nickname: user.nickname || '',
+                team: user.team || '',
+                dob: user.biometrics?.dob || '',
+                gender: user.biometrics?.gender || 'Male',
+                heightFt: user.biometrics?.heightFt || '',
+                heightIn: user.biometrics?.heightIn || '',
+                weight: user.biometrics?.weight || ''
+            });
+        }
+    }, [user]);
+
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!formData.email || !formData.name) {
-            setError('Email and Name are required');
-            return;
-        }
-
         try {
-            onAdd(formData);
-            onClose();
-            setFormData({
-                email: '',
-                name: '',
-                nickname: '',
-                team: '',
-                dob: '',
-                gender: 'Male',
-                heightFt: '',
-                heightIn: '',
-                weight: ''
+            onUpdate(user.id, {
+                name: formData.name,
+                nickname: formData.nickname,
+                team: formData.team,
+                biometrics: {
+                    dob: formData.dob,
+                    gender: formData.gender,
+                    heightFt: formData.heightFt,
+                    heightIn: formData.heightIn,
+                    weight: formData.weight
+                }
             });
+            onClose();
             setError('');
         } catch (err) {
             setError(err.message);
@@ -48,7 +57,7 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 w-full max-w-lg overflow-hidden">
                 <div className="flex justify-between items-center p-6 border-b border-gray-700">
-                    <h3 className="text-xl font-semibold text-white">Add New Profile</h3>
+                    <h3 className="text-xl font-semibold text-white">Edit Profile</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-white">
                         <X size={20} />
                     </button>
@@ -85,7 +94,6 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-400 mb-1">Team</label>
-
                             <input
                                 type="text"
                                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
@@ -93,16 +101,6 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
                                 onChange={e => setFormData({ ...formData, team: e.target.value })}
                             />
                         </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                        <input
-                            type="email"
-                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                            value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -170,7 +168,7 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
                             type="submit"
                             className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all font-medium"
                         >
-                            Create Profile
+                            Save Changes
                         </button>
                     </div>
                 </form>
@@ -179,4 +177,4 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
     );
 };
 
-export default AddUserModal;
+export default EditUserModal;

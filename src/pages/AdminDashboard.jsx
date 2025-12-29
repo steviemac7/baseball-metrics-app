@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
-import { Plus, ChevronRight, User as UserIcon, Trash2, Ruler, List, Upload } from 'lucide-react';
+import { Plus, ChevronRight, User as UserIcon, Trash2, Ruler, List, Upload, Pencil } from 'lucide-react';
 import AddUserModal from '../components/AddUserModal';
+import EditUserModal from '../components/EditUserModal';
 import BulkUserImportModal from '../components/BulkUserImportModal';
 import DistanceCalculator from '../components/DistanceCalculator';
 
@@ -11,6 +12,7 @@ const AdminDashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isCalcOpen, setIsCalcOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
 
     useEffect(() => {
         loadUsers();
@@ -19,7 +21,16 @@ const AdminDashboard = () => {
     const loadUsers = async () => {
         const allUsers = await dataService.getUsers();
         // Filter for non-admin users only
-        setUsers(allUsers.filter(u => u.role !== 'ADMIN'));
+        setUsers(allUsers.filter(u => u.role !== 'ADMIN').sort((a, b) => a.name.localeCompare(b.name)));
+    };
+
+    const handleUpdateUser = async (uid, updatedData) => {
+        try {
+            await dataService.updateUser(uid, updatedData);
+            loadUsers();
+        } catch (error) {
+            alert('Error updating user: ' + error.message);
+        }
     };
 
     const handleAddUser = async (userData) => {
@@ -113,6 +124,17 @@ const AdminDashboard = () => {
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <button
+                                            onClick={(e) => {
+                                                e.preventDefault(); // Stop navigation
+                                                e.stopPropagation();
+                                                setEditingUser(user);
+                                            }}
+                                            className="p-2 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors z-10"
+                                            title="Edit Profile"
+                                        >
+                                            <Pencil className="w-5 h-5" />
+                                        </button>
+                                        <button
                                             onClick={(e) => handleDeleteUser(e, user.id)}
                                             className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors z-10"
                                             title="Delete Profile"
@@ -125,7 +147,10 @@ const AdminDashboard = () => {
 
                                 <div>
                                     <h3 className="text-xl font-bold text-white leading-tight">{user.name}</h3>
-                                    <p className="text-sm font-medium text-blue-400 mb-4 mt-1">{user.team || 'No Team'}</p>
+                                    {user.nickname && (
+                                        <p className="text-sm text-blue-400 italic">"{user.nickname}"</p>
+                                    )}
+                                    <p className="text-sm font-medium text-gray-500 mb-4 mt-1 uppercase tracking-widest font-semibold">{user.team || 'No Team'}</p>
                                 </div>
 
                                 <div className="space-y-2 text-sm text-gray-400 border-t border-gray-700/50 pt-4">
@@ -165,6 +190,13 @@ const AdminDashboard = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onAdd={handleAddUser}
+            />
+
+            <EditUserModal
+                isOpen={!!editingUser}
+                onClose={() => setEditingUser(null)}
+                user={editingUser}
+                onUpdate={handleUpdateUser}
             />
 
             <BulkUserImportModal
