@@ -21,6 +21,7 @@ const SummaryStats = () => {
     // Filters
     const [filters, setFilters] = useState({
         gender: 'All',
+        team: 'All',
         minAge: '',
         maxAge: '',
         minHeight: '', // in inches
@@ -38,7 +39,13 @@ const SummaryStats = () => {
             setMetrics(allMetrics);
         };
         load();
+        load();
     }, []);
+
+    const uniqueTeams = useMemo(() => {
+        const teams = new Set(users.map(u => u.team || '').filter(Boolean));
+        return Array.from(teams).sort();
+    }, [users]);
 
     // Filtered Users
     const filteredUsers = useMemo(() => {
@@ -47,7 +54,9 @@ const SummaryStats = () => {
             const age = bio.dob ? new Date().getFullYear() - new Date(bio.dob).getFullYear() : null;
             const heightInches = (parseInt(bio.heightFt || 0) * 12) + parseInt(bio.heightIn || 0);
 
+
             if (filters.gender !== 'All' && bio.gender !== filters.gender) return false;
+            if (filters.team !== 'All' && (user.team || 'Unassigned') !== filters.team) return false;
             if (filters.minAge && age < parseInt(filters.minAge)) return false;
             if (filters.maxAge && age > parseInt(filters.maxAge)) return false;
             if (filters.minWeight && bio.weight < parseInt(filters.minWeight)) return false;
@@ -147,6 +156,20 @@ const SummaryStats = () => {
                             <option value="All">All Items</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1">Team</label>
+                        <select
+                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                            value={filters.team}
+                            onChange={(e) => setFilters({ ...filters, team: e.target.value })}
+                        >
+                            <option value="All">All Teams</option>
+                            {uniqueTeams.map(team => (
+                                <option key={team} value={team}>{team}</option>
+                            ))}
                         </select>
                     </div>
 
