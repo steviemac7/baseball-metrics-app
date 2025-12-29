@@ -532,6 +532,5 @@ const BulkMetricEntry = () => {
     );
 };
 
-export default BulkMetricEntry;
 
 export default BulkMetricEntry;
