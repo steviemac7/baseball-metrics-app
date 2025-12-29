@@ -246,7 +246,43 @@ const BulkMetricEntry = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-4">
+    // Stopwatch Assignment State
+    const [assignedSplitMap, setAssignedSplitMap] = useState({}); // { 0: "Name", 1: "Name" }
+    const [assigningSplit, setAssigningSplit] = useState(null); // { index: 0, value: 12.34 }
+
+    // ... (existing code)
+
+    const handleAssignSplit = (index, value) => {
+        if (index === 'RESET') {
+            setAssignedSplitMap({});
+            return;
+        }
+        setAssigningSplit({ index, value });
+    };
+
+    const handleSelectAthlete = (userId, userName) => {
+        if (!assigningSplit) return;
+
+        // 1. Update the metric value
+        updateUserValue(userId, userName, assigningSplit.value);
+
+        // 2. Mark this split as assigned
+        setAssignedSplitMap(prev => ({
+            ...prev,
+            [assigningSplit.index]: userName
+        }));
+
+        // 3. Close modal
+        setAssigningSplit(null);
+    };
+
+    return (
+        <div className="max-w-4xl mx-auto p-4 relative">
+            {/* ... existing header/filter code ... */}
+
+            {/* ... existing main content ... */}
+            {/* WRAP existing content logic or just inject modal at end */}
+
             <div className="mb-6 flex items-center justify-between">
                 <button
                     onClick={() => navigate('/')}
@@ -457,7 +493,12 @@ const BulkMetricEntry = () => {
             </div>
             {isStopwatchOpen && (
                 <div className="mt-8">
-                    <Stopwatch onClose={() => setIsStopwatchOpen(false)} embedded={true} />
+                    <Stopwatch
+                        onClose={() => setIsStopwatchOpen(false)}
+                        embedded={true}
+                        onAssignSplit={handleAssignSplit}
+                        assignedSplits={assignedSplitMap}
+                    />
                 </div>
             )}
             {isGpsOpen && (
@@ -465,8 +506,35 @@ const BulkMetricEntry = () => {
                     <DistanceCalculator onClose={() => setIsGpsOpen(false)} embedded={true} />
                 </div>
             )}
+
+            {/* Assignment Modal */}
+            {assigningSplit && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 max-w-md w-full flex flex-col max-h-[80vh]">
+                        <div className="p-4 border-b border-gray-700 flex justify-between items-center shrink-0">
+                            <h3 className="font-bold text-white">Assign Time: {assigningSplit.value}s</h3>
+                            <button onClick={() => setAssigningSplit(null)} className="text-gray-400 hover:text-white">✕</button>
+                        </div>
+                        <div className="p-2 overflow-y-auto flex-1">
+                            <p className="text-gray-400 text-sm px-2 mb-2">Select athlete to assign this time to:</p>
+                            {filteredUsers.map(user => (
+                                <button
+                                    key={user.id}
+                                    onClick={() => handleSelectAthlete(user.id, user.name)}
+                                    className="w-full text-left p-3 hover:bg-gray-700 rounded-lg flex items-center justify-between group"
+                                >
+                                    <span className="text-gray-200 font-medium group-hover:text-white">{user.name}</span>
+                                    {user.nickname && <span className="text-xs text-gray-500 italic">{user.nickname}</span>}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
+
+export default BulkMetricEntry;
 
 export default BulkMetricEntry;

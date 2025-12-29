@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Timer, RefreshCw, Flag, Play, Square } from 'lucide-react';
 
-const Stopwatch = ({ onClose, embedded = false }) => {
+const Stopwatch = ({ onClose, embedded = false, onAssignSplit, assignedSplits = {} }) => {
     const [isRunning, setIsRunning] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const [finishes, setFinishes] = useState([]);
@@ -57,6 +57,7 @@ const Stopwatch = ({ onClose, embedded = false }) => {
         setElapsed(0);
         startTimeRef.current = 0;
         cancelAnimationFrame(requestRef.current);
+        if (onAssignSplit) onAssignSplit('RESET'); // Signal reset
     };
 
     useEffect(() => {
@@ -94,17 +95,40 @@ const Stopwatch = ({ onClose, embedded = false }) => {
 
             {/* Results List */}
             <div className="space-y-2">
-                {[0, 1, 2, 3, 4].map((index) => (
-                    <div key={index} className={`flex justify-between items-center p-3 rounded-lg border ${finishes[index]
-                        ? 'bg-gray-700/50 border-gray-600'
-                        : 'bg-gray-800/30 border-gray-800 text-gray-600'
-                        }`}>
-                        <span className="font-medium">Athlete {index + 1}</span>
-                        <span className={`font-mono font-bold ${finishes[index] ? 'text-white' : ''}`}>
-                            {finishes[index] ? `${formatTime(finishes[index])}s` : '--'}
-                        </span>
-                    </div>
-                ))}
+                {[0, 1, 2, 3, 4].map((index) => {
+                    const finishTime = finishes[index];
+                    const assignedName = assignedSplits[index];
+
+                    return (
+                        <div key={index} className={`flex justify-between items-center p-3 rounded-lg border ${finishTime
+                            ? 'bg-gray-700/50 border-gray-600'
+                            : 'bg-gray-800/30 border-gray-800 text-gray-600'
+                            }`}>
+                            <span className="font-medium text-gray-300">
+                                {assignedName ? (
+                                    <span className="text-blue-400 font-bold">{assignedName}</span>
+                                ) : (
+                                    `Athlete ${index + 1}`
+                                )}
+                            </span>
+
+                            <div className="flex items-center space-x-3">
+                                <span className={`font-mono font-bold ${finishTime ? 'text-white' : ''}`}>
+                                    {finishTime ? `${formatTime(finishTime)}s` : '--'}
+                                </span>
+
+                                {finishTime && onAssignSplit && !assignedName && (
+                                    <button
+                                        onClick={() => onAssignSplit(index, parseFloat(formatTime(finishTime)))}
+                                        className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
+                                    >
+                                        Assign
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Controls */}
