@@ -9,6 +9,7 @@ import DistanceCalculator from '../components/DistanceCalculator';
 import Stopwatch from '../components/Stopwatch';
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -120,68 +121,85 @@ const AdminDashboard = () => {
                     <h3 className="text-xl font-bold text-white mb-4 pl-3 border-l-4 border-blue-500 bg-gray-800/30 py-1 rounded-r-lg inline-block">
                         {team} <span className="text-gray-500 text-sm ml-2">({teamUsers.length})</span>
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {teamUsers.map(user => (
-                            <Link
-                                key={user.id}
-                                to={`/user/${user.id}`}
-                                className="block bg-gray-800 rounded-xl border border-gray-700 p-6 hover:border-blue-500/50 hover:bg-gray-800/80 transition-all group"
-                            >
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="bg-gray-700 p-3 rounded-lg group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors">
-                                        <UserIcon className="w-6 h-6" />
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault(); // Stop navigation
-                                                e.stopPropagation();
-                                                setEditingUser(user);
-                                            }}
-                                            className="p-2 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors z-10"
-                                            title="Edit Profile"
-                                        >
-                                            <Pencil className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            onClick={(e) => handleDeleteUser(e, user.id)}
-                                            className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors z-10"
-                                            title="Delete Profile"
-                                        >
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
-                                        <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-blue-400 transform group-hover:translate-x-1 transition-all" />
-                                    </div>
-                                </div>
 
-                                <div>
-                                    <h3 className="text-xl font-bold text-white leading-tight">{user.name}</h3>
-                                    {user.nickname && (
-                                        <p className="text-sm text-blue-400 italic">"{user.nickname}"</p>
-                                    )}
-                                    <p className="text-sm font-medium text-gray-500 mb-4 mt-1 uppercase tracking-widest font-semibold">{user.team || 'No Team'}</p>
-                                </div>
-
-                                <div className="space-y-2 text-sm text-gray-400 border-t border-gray-700/50 pt-4">
-                                    <div className="flex justify-between">
-                                        <span>Age</span>
-                                        <span className="text-white">
+                    <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-sm">
+                        <table className="min-w-full divide-y divide-gray-700">
+                            <thead className="bg-gray-900/50">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Athlete
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Age
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Height
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Weight
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700 bg-gray-800">
+                                {teamUsers.map(user => (
+                                    <tr
+                                        key={user.id}
+                                        onClick={() => navigate(`/user/${user.id}`)}
+                                        className="hover:bg-gray-700/50 cursor-pointer transition-colors group"
+                                    >
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="flex-shrink-0 h-10 w-10">
+                                                    <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold border border-gray-600">
+                                                        {user.name.charAt(0)}
+                                                    </div>
+                                                </div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-white">{user.name}</div>
+                                                    {user.nickname && <div className="text-sm text-blue-400 italic">"{user.nickname}"</div>}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                             {user.biometrics?.dob ? ((new Date() - new Date(user.biometrics.dob)) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(2) : '-'}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Height</span>
-                                        <span className="text-white">
-                                            {user.biometrics?.heightFt}'{user.biometrics?.heightIn}"
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Weight</span>
-                                        <span className="text-white">{user.biometrics?.weight} lbs</span>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                            {user.biometrics?.heightFt || 0}'{user.biometrics?.heightIn || 0}"
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                            {user.biometrics?.weight || 0} lbs
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex justify-end space-x-2">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingUser(user);
+                                                    }}
+                                                    className="p-2 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                                    title="Edit Profile"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteUser(e, user.id);
+                                                    }}
+                                                    className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                    title="Delete Profile"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             ))}
