@@ -287,7 +287,16 @@ const SummaryStats = () => {
                                     const showName = isAdmin || isMe;
 
                                     const bio = data.user.biometrics || {};
-                                    const age = bio.dob ? new Date().getFullYear() - new Date(bio.dob).getFullYear() : '-';
+                                    let age = '-';
+                                    if (bio.dob) {
+                                        const ageDiffMs = new Date() - new Date(bio.dob);
+                                        const ageDate = new Date(ageDiffMs); // miliseconds from epoch
+                                        // A slightly more precise way:
+                                        // (diff / 31557600000) for regular years, but let's stick to simple year diff or better math
+                                        // Correct precise age:
+                                        const years = ageDiffMs / (1000 * 60 * 60 * 24 * 365.25);
+                                        age = years.toFixed(2);
+                                    }
 
                                     return (
                                         <tr key={data.user.id} className={clsx("transition-colors", isMe ? "bg-blue-500/10 hover:bg-blue-500/20" : "hover:bg-gray-700/30")}>
