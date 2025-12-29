@@ -106,15 +106,15 @@ const BulkMetricEntry = () => {
     }, [recognition, filteredUsers]); // Dependency on filteredUsers for matching logic (indirectly via handleVoiceCommand if not memoized elsewhere)
 
     const handleVoiceCommand = (transcript) => {
-        // Expected format: "Name Value" e.g. "Pat 85" or "Patrick 88.5"
-        // Cleanup: Remove common punctuation that speech reco might add
-        const cleanTranscript = transcript.replace(/[.,;]$/g, '').replace(/,/g, '');
+        // Expected format: "Name Value Number" e.g. "Pat Value 85"
+        // Cleanup: Remove common punctuation
+        const cleanTranscript = transcript.replace(/[.,;]/g, '').toLowerCase();
 
-        // Regex: Last part matches number (integer or decimal), rest is name
-        const match = cleanTranscript.match(/(.*)\s+(\d+(\.\d+)?)$/);
+        // Regex: (Name) "value" (Number)
+        const match = cleanTranscript.match(/(.*)\s+value\s+(\d+(\.\d+)?)$/);
 
         if (!match) {
-            setVoiceFeedback({ type: 'error', message: `Could not parse: "${transcript}"` });
+            setVoiceFeedback({ type: 'error', message: `Say "Name VALUE Number"` });
             return;
         }
 
