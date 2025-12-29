@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { METRIC_GROUPS } from '../utils/constants';
-import { ArrowLeft, Save, Calendar, Filter, X, Check, Mic, MicOff, AlertCircle } from 'lucide-react';
+import Stopwatch from '../components/Stopwatch';
+import { ArrowLeft, Save, Calendar, Filter, X, Check, Mic, MicOff, AlertCircle, Timer } from 'lucide-react';
 
 const BulkMetricEntry = () => {
     const navigate = useNavigate();
@@ -13,6 +14,12 @@ const BulkMetricEntry = () => {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [values, setValues] = useState({});
     const [saving, setSaving] = useState(false);
+    const [isStopwatchOpen, setIsStopwatchOpen] = useState(false);
+
+    const STOPWATCH_METRICS = [
+        'dash_60', 'dash_30', 'home_to_2b', 'steal_2b', // Foot Speed
+        'pop_2b', 'pop_3b' // Pop Times
+    ];
 
     useEffect(() => {
         loadUsers();
@@ -365,6 +372,16 @@ const BulkMetricEntry = () => {
                             {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                         </button>
 
+                        {STOPWATCH_METRICS.includes(selectedMetricId) && (
+                            <button
+                                onClick={() => setIsStopwatchOpen(true)}
+                                className="p-2 rounded-lg bg-gray-700 text-green-400 hover:text-white hover:bg-gray-600 transition-all border border-green-500/20"
+                                title="Open Stopwatch"
+                            >
+                                <Timer className="w-5 h-5" />
+                            </button>
+                        )}
+
                         <button
                             onClick={handleSave}
                             disabled={saving}
@@ -424,6 +441,9 @@ const BulkMetricEntry = () => {
                     </button>
                 </div>
             </div>
+            {isStopwatchOpen && (
+                <Stopwatch onClose={() => setIsStopwatchOpen(false)} />
+            )}
         </div>
     );
 };

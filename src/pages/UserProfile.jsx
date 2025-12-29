@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { dataService } from '../services/dataService';
 import TrendChart from '../components/TrendChart';
 import DistanceCalculator from '../components/DistanceCalculator';
-import { Plus, Table, TrendingUp, Trash2, Ruler } from 'lucide-react';
+import Stopwatch from '../components/Stopwatch';
+import { Plus, Table, TrendingUp, Trash2, Ruler, Timer } from 'lucide-react';
 import clsx from 'clsx';
 import { METRIC_GROUPS } from '../utils/constants';
 
@@ -21,6 +22,12 @@ const UserProfile = () => {
     const [inputState, setInputState] = useState({});
     const [showGpsModal, setShowGpsModal] = useState(false);
     const [gpsTargetMetric, setGpsTargetMetric] = useState(null);
+    const [isStopwatchOpen, setIsStopwatchOpen] = useState(false);
+
+    const STOPWATCH_METRICS = [
+        'dash_60', 'dash_30', 'home_to_2b', 'steal_2b', // Foot Speed
+        'pop_2b', 'pop_3b' // Pop Times
+    ];
 
     useEffect(() => {
         loadData();
@@ -155,6 +162,15 @@ const UserProfile = () => {
                         title="Use GPS Rangefinder"
                     >
                         <Ruler size={16} />
+                    </button>
+                )}
+                {STOPWATCH_METRICS.includes(metric.id) && (
+                    <button
+                        onClick={() => setIsStopwatchOpen(true)}
+                        className="p-1 px-2 bg-gray-700 border border-gray-600 text-green-400 hover:bg-gray-600 rounded flex items-center"
+                        title="Open Stopwatch"
+                    >
+                        <Timer size={16} />
                     </button>
                 )}
                 <button
@@ -326,6 +342,9 @@ const UserProfile = () => {
                         setGpsTargetMetric(null);
                     }}
                 />
+            )}
+            {isStopwatchOpen && (
+                <Stopwatch onClose={() => setIsStopwatchOpen(false)} />
             )}
         </div>
     );
