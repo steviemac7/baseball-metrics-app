@@ -58,8 +58,7 @@ const BulkMetricEntry = () => {
         }
     };
 
-    const [values, setValues] = useState({});
-    const [saving, setSaving] = useState(false);
+
 
     // Voice Entry State
     const [isListening, setIsListening] = useState(false);
@@ -344,8 +343,8 @@ const BulkMetricEntry = () => {
                     <div className="flex items-center space-x-3">
                         {voiceFeedback && (
                             <div className={`text-sm px-3 py-1 rounded flex items-center ${voiceFeedback.type === 'error' ? 'bg-red-500/10 text-red-400' :
-                                    voiceFeedback.type === 'success' ? 'bg-green-500/10 text-green-400' :
-                                        'bg-blue-500/10 text-blue-400'
+                                voiceFeedback.type === 'success' ? 'bg-green-500/10 text-green-400' :
+                                    'bg-blue-500/10 text-blue-400'
                                 }`}>
                                 {voiceFeedback.type === 'error' && <AlertCircle className="w-4 h-4 mr-2" />}
                                 {voiceFeedback.message}
@@ -355,8 +354,8 @@ const BulkMetricEntry = () => {
                         <button
                             onClick={toggleListening}
                             className={`p-2 rounded-lg transition-all ${isListening
-                                    ? 'bg-red-500/20 text-red-500 animate-pulse border border-red-500/50'
-                                    : 'bg-gray-700 text-gray-400 hover:text-white hover:bg-gray-600'
+                                ? 'bg-red-500/20 text-red-500 animate-pulse border border-red-500/50'
+                                : 'bg-gray-700 text-gray-400 hover:text-white hover:bg-gray-600'
                                 }`}
                             title={isListening ? "Stop Voice Entry" : "Start Voice Entry"}
                         >
