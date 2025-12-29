@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
-import { Plus, ChevronRight, User as UserIcon, Trash2, Ruler, List, Upload, Pencil } from 'lucide-react';
+import { Plus, ChevronRight, User as UserIcon, Trash2, Ruler, List, Upload, Pencil, Timer } from 'lucide-react';
 import AddUserModal from '../components/AddUserModal';
 import EditUserModal from '../components/EditUserModal';
 import BulkUserImportModal from '../components/BulkUserImportModal';
 import DistanceCalculator from '../components/DistanceCalculator';
+import Stopwatch from '../components/Stopwatch';
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isCalcOpen, setIsCalcOpen] = useState(false);
+    const [isStopwatchOpen, setIsStopwatchOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
 
     useEffect(() => {
@@ -70,6 +72,13 @@ const AdminDashboard = () => {
                     <p className="text-gray-400 mt-1">Manage and track athlete metrics</p>
                 </div>
                 <div className="flex space-x-3">
+                    <button
+                        onClick={() => setIsStopwatchOpen(true)}
+                        className="flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg border border-gray-600 transition-all"
+                    >
+                        <Timer className="w-5 h-5 mr-2" />
+                        Stopwatch
+                    </button>
                     <button
                         onClick={() => setIsCalcOpen(true)}
                         className="flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg border border-gray-600 transition-all"
@@ -211,6 +220,11 @@ const AdminDashboard = () => {
             {
                 isCalcOpen && (
                     <DistanceCalculator onClose={() => setIsCalcOpen(false)} />
+                )
+            }
+            {
+                isStopwatchOpen && (
+                    <Stopwatch onClose={() => setIsStopwatchOpen(false)} />
                 )
             }
         </div >
