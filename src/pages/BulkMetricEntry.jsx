@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { METRIC_GROUPS } from '../utils/constants';
-import { ArrowLeft, Save, Calendar, Filter, X, Check } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, Filter, X, Check, Mic, MicOff, AlertCircle } from 'lucide-react';
 
 const BulkMetricEntry = () => {
     const navigate = useNavigate();
@@ -55,6 +55,127 @@ const BulkMetricEntry = () => {
             setSelectedTeams(prev => prev.filter(t => t !== team));
         } else {
             setSelectedTeams(prev => [...prev, team]);
+        }
+    };
+
+    const [values, setValues] = useState({});
+    const [saving, setSaving] = useState(false);
+
+    // Voice Entry State
+    const [isListening, setIsListening] = useState(false);
+    const [voiceFeedback, setVoiceFeedback] = useState(null); // { type: 'success' | 'error', message: '' }
+
+    const recognition = useMemo(() => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return null;
+
+        const reco = new SpeechRecognition();
+        reco.continuous = true; // Keep listening
+        reco.interimResults = false;
+        reco.lang = 'en-US';
+        return reco;
+    }, []);
+
+    useEffect(() => {
+        if (!recognition) return;
+
+        recognition.onresult = (event) => {
+            const lastResult = event.results[event.results.length - 1];
+            if (lastResult.isFinal) {
+                const transcript = lastResult[0].transcript.trim();
+                handleVoiceCommand(transcript);
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error", event.error);
+            setIsListening(false);
+            setVoiceFeedback({ type: 'error', message: 'Mic Error: ' + event.error });
+        };
+
+        recognition.onend = () => {
+            // If we intended to listen, restart? For now, let's auto-stop to be safe or just sync state
+            if (isListening) {
+                // recognition.start(); // continuous mode might stop on silence
+                setIsListening(false);
+            }
+        };
+
+        return () => {
+            recognition.stop();
+        };
+    }, [recognition, filteredUsers]); // Dependency on filteredUsers for matching logic (indirectly via handleVoiceCommand if not memoized elsewhere)
+
+    const handleVoiceCommand = (transcript) => {
+        // Expected format: "Name Value" e.g. "Pat 85" or "Patrick 88.5"
+        // Regex: Last part matches number (integer or decimal), rest is name
+        const match = transcript.match(/(.*)\s+(\d+(\.\d+)?)$/);
+
+        if (!match) {
+            setVoiceFeedback({ type: 'error', message: `Could not parse: "${transcript}"` });
+            return;
+        }
+
+        const rawName = match[1].trim().toLowerCase();
+        const value = match[2];
+
+        // Find user in FILTERED list
+        // 1. Exact Name Match
+        // 2. Exact Nickname Match
+        // 3. First Name Match (if unique in filtered list)
+
+        const candidates = filteredUsers.filter(u => {
+            const name = u.name.toLowerCase();
+            const nickname = (u.nickname || '').toLowerCase();
+            const firstName = name.split(' ')[0];
+
+            return name === rawName || nickname === rawName || firstName === rawName;
+        });
+
+        if (candidates.length === 0) {
+            setVoiceFeedback({ type: 'error', message: `Athlete not found: "${rawName}"` });
+        } else if (candidates.length > 1) {
+            // Check for exact full name match to resolve ambiguity?
+            const exactMatch = candidates.find(u => u.name.toLowerCase() === rawName || (u.nickname || '').toLowerCase() === rawName);
+            if (exactMatch) {
+                updateUserValue(exactMatch.id, exactMatch.name, value);
+            } else {
+                setVoiceFeedback({ type: 'error', message: `Multiple matches for "${rawName}"` });
+            }
+        } else {
+            // Single match
+            updateUserValue(candidates[0].id, candidates[0].name, value);
+        }
+    };
+
+    const updateUserValue = (userId, userName, value) => {
+        setValues(prev => ({
+            ...prev,
+            [userId]: value
+        }));
+        setVoiceFeedback({ type: 'success', message: `Set ${userName}: ${value}` });
+
+        // Clear feedback after 3s
+        setTimeout(() => setVoiceFeedback(null), 3000);
+    };
+
+    const toggleListening = () => {
+        if (!recognition) {
+            alert("Voice recognition not supported in this browser.");
+            return;
+        }
+
+        if (isListening) {
+            recognition.stop();
+            setIsListening(false);
+        } else {
+            try {
+                recognition.start();
+                setIsListening(true);
+                setVoiceFeedback({ type: 'info', message: 'Listening... (Say "Name Value")' });
+            } catch (err) {
+                console.error(err);
+            }
         }
     };
 
@@ -212,24 +333,48 @@ const BulkMetricEntry = () => {
             </div>
 
             <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-lg">
-                <div className="p-4 border-b border-gray-700 bg-gray-900/50 flex justify-between items-center">
+                <div className="p-4 border-b border-gray-700 bg-gray-900/50 flex justify-between items-center flex-wrap gap-4">
                     <div>
                         <h2 className="text-lg font-semibold text-white">Enter Results</h2>
                         <p className="text-sm text-gray-400">
                             {getSelectedMetricLabel()} ({getSelectedMetricUnit()})
                         </p>
                     </div>
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all ${saving
-                            ? 'bg-gray-600 cursor-not-allowed text-gray-300'
-                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'
-                            }`}
-                    >
-                        <Save className="w-4 h-4 mr-2" />
-                        {saving ? 'Saving...' : 'Save All Entries'}
-                    </button>
+
+                    <div className="flex items-center space-x-3">
+                        {voiceFeedback && (
+                            <div className={`text-sm px-3 py-1 rounded flex items-center ${voiceFeedback.type === 'error' ? 'bg-red-500/10 text-red-400' :
+                                    voiceFeedback.type === 'success' ? 'bg-green-500/10 text-green-400' :
+                                        'bg-blue-500/10 text-blue-400'
+                                }`}>
+                                {voiceFeedback.type === 'error' && <AlertCircle className="w-4 h-4 mr-2" />}
+                                {voiceFeedback.message}
+                            </div>
+                        )}
+
+                        <button
+                            onClick={toggleListening}
+                            className={`p-2 rounded-lg transition-all ${isListening
+                                    ? 'bg-red-500/20 text-red-500 animate-pulse border border-red-500/50'
+                                    : 'bg-gray-700 text-gray-400 hover:text-white hover:bg-gray-600'
+                                }`}
+                            title={isListening ? "Stop Voice Entry" : "Start Voice Entry"}
+                        >
+                            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                        </button>
+
+                        <button
+                            onClick={handleSave}
+                            disabled={saving}
+                            className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all ${saving
+                                ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'
+                                }`}
+                        >
+                            <Save className="w-4 h-4 mr-2" />
+                            {saving ? 'Saving...' : 'Save All Entries'}
+                        </button>
+                    </div>
                 </div>
 
                 <div className="divide-y divide-gray-700">
