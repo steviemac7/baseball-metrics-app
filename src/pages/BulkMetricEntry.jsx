@@ -201,17 +201,34 @@ const BulkMetricEntry = () => {
         setSaving(true);
         try {
             const promises = [];
+            const isMph = getSelectedMetricUnit() === 'mph';
 
             // Iterate through all users who have a value entered
             for (const [userId, value] of Object.entries(values)) {
                 // Ensure value is handled as a string for validation, but keep original type for saving if needed
                 if (value !== null && value !== undefined && String(value).trim() !== '') {
-                    promises.push(dataService.addMetric({
-                        userId,
-                        date,
-                        metricId: selectedMetricId,
-                        value: parseFloat(value)
-                    }));
+                    if (isMph) {
+                        // Split by comma or space
+                        const parts = String(value).split(/[\s,]+/).filter(v => v.trim() !== '');
+                        parts.forEach(part => {
+                            const floatVal = parseFloat(part);
+                            if (!isNaN(floatVal)) {
+                                promises.push(dataService.addMetric({
+                                    userId,
+                                    date,
+                                    metricId: selectedMetricId,
+                                    value: floatVal
+                                }));
+                            }
+                        });
+                    } else {
+                        promises.push(dataService.addMetric({
+                            userId,
+                            date,
+                            metricId: selectedMetricId,
+                            value: parseFloat(value)
+                        }));
+                    }
                 }
             }
 
@@ -461,9 +478,9 @@ const BulkMetricEntry = () => {
                                 </div>
                             </div>
                             <input
-                                type="number"
+                                type={getSelectedMetricUnit() === 'mph' ? 'text' : 'number'}
                                 step="any"
-                                placeholder={getSelectedMetricUnit()}
+                                placeholder={getSelectedMetricUnit() === 'mph' ? "e.g. 90 85 88" : getSelectedMetricUnit()}
                                 value={values[user.id] || ''}
                                 onChange={(e) => handleValueChange(user.id, e.target.value)}
                                 onWheel={(e) => e.target.blur()} // Prevent accidentally changing value while scrolling
