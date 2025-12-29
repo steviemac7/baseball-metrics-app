@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { METRIC_GROUPS } from '../utils/constants';
-import { ArrowLeft, Save, Calendar, Filter } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, Filter, X, Check } from 'lucide-react';
 
 const BulkMetricEntry = () => {
     const navigate = useNavigate();
-    const [users, setUsers] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
+    const [selectedTeams, setSelectedTeams] = useState([]);
     const [selectedGroup, setSelectedGroup] = useState(Object.keys(METRIC_GROUPS)[0]);
     const [selectedMetricId, setSelectedMetricId] = useState(METRIC_GROUPS[Object.keys(METRIC_GROUPS)[0]][0].id);
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -27,15 +28,33 @@ const BulkMetricEntry = () => {
 
     const loadUsers = async () => {
         try {
-            const allUsers = await dataService.getUsers();
+            const usersData = await dataService.getUsers();
             // Filter for non-admin users only
-            const athletes = allUsers.filter(u => u.role !== 'ADMIN');
+            const athletes = usersData.filter(u => u.role !== 'ADMIN');
             // Sort alphabetically
             athletes.sort((a, b) => a.name.localeCompare(b.name));
-            setUsers(athletes);
+            setAllUsers(athletes);
         } catch (error) {
             console.error("Error loading users:", error);
             alert("Failed to load users.");
+        }
+    };
+
+    const uniqueTeams = useMemo(() => {
+        const teams = new Set(allUsers.map(u => u.team || 'Unassigned').filter(Boolean));
+        return Array.from(teams).sort();
+    }, [allUsers]);
+
+    const filteredUsers = useMemo(() => {
+        if (selectedTeams.length === 0) return allUsers;
+        return allUsers.filter(u => selectedTeams.includes(u.team || 'Unassigned'));
+    }, [allUsers, selectedTeams]);
+
+    const toggleTeam = (team) => {
+        if (selectedTeams.includes(team)) {
+            setSelectedTeams(prev => prev.filter(t => t !== team));
+        } else {
+            setSelectedTeams(prev => [...prev, team]);
         }
     };
 
@@ -168,8 +187,8 @@ const BulkMetricEntry = () => {
                         onClick={handleSave}
                         disabled={saving}
                         className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all ${saving
-                                ? 'bg-gray-600 cursor-not-allowed text-gray-300'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'
+                            ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'
                             }`}
                     >
                         <Save className="w-4 h-4 mr-2" />
@@ -178,7 +197,7 @@ const BulkMetricEntry = () => {
                 </div>
 
                 <div className="divide-y divide-gray-700">
-                    {users.map(user => (
+                    {filteredUsers.map(user => (
                         <div key={user.id} className="p-4 flex items-center justify-between hover:bg-gray-700/30 transition-colors">
                             <div className="flex items-center">
                                 <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold mr-3 border border-gray-600">
@@ -198,7 +217,7 @@ const BulkMetricEntry = () => {
                         </div>
                     ))}
 
-                    {users.length === 0 && (
+                    {filteredUsers.length === 0 && (
                         <div className="p-8 text-center text-gray-500">
                             No athletes found.
                         </div>
@@ -210,8 +229,8 @@ const BulkMetricEntry = () => {
                         onClick={handleSave}
                         disabled={saving}
                         className={`flex items-center px-6 py-2 rounded-lg font-medium transition-all ${saving
-                                ? 'bg-gray-600 cursor-not-allowed text-gray-300'
-                                : 'bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20'
+                            ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+                            : 'bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20'
                             }`}
                     >
                         <Save className="w-4 h-4 mr-2" />

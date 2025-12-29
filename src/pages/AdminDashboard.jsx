@@ -132,7 +132,7 @@ const AdminDashboard = () => {
                                     <div className="flex justify-between">
                                         <span>Age</span>
                                         <span className="text-white">
-                                            {user.biometrics?.dob ? new Date().getFullYear() - new Date(user.biometrics.dob).getFullYear() : '-'}
+                                            {user.biometrics?.dob ? ((new Date() - new Date(user.biometrics.dob)) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(2) : '-'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
