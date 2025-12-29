@@ -5,6 +5,7 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
     const [formData, setFormData] = useState({
         email: '',
         name: '',
+        team: '',
         dob: '',
         gender: 'Male',
         heightFt: '',
@@ -28,6 +29,7 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
             setFormData({
                 email: '',
                 name: '',
+                team: '',
                 dob: '',
                 gender: 'Male',
                 heightFt: '',
@@ -68,14 +70,24 @@ const AddUserModal = ({ isOpen, onClose, onAdd }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Team</label>
                             <input
-                                type="email"
+                                type="text"
                                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                                value={formData.email}
-                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                value={formData.team}
+                                onChange={e => setFormData({ ...formData, team: e.target.value })}
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                        <input
+                            type="email"
+                            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

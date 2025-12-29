@@ -183,6 +183,7 @@ const UserProfile = () => {
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
                 <h1 className="text-3xl font-bold text-white mb-2">{profileUser.name}</h1>
                 <div className="flex space-x-6 text-gray-400">
+                    <span>{profileUser.team && `Team: ${profileUser.team}`}</span>
                     <span>@{profileUser.username}</span>
                     <span>{profileUser.biometrics?.dob}</span>
                     <span>{profileUser.biometrics?.heightFt}'{profileUser.biometrics?.heightIn}"</span>

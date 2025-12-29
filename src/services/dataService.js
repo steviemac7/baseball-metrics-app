@@ -81,6 +81,7 @@ export const dataService = {
             email: userData.email,
             role: 'USER', // Default role
             name: userData.name,
+            team: userData.team || '',
             biometrics: userData.biometrics || {},
             createdAt: new Date().toISOString()
         };
