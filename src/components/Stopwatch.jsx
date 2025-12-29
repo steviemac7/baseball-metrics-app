@@ -29,7 +29,6 @@ const Stopwatch = ({ onClose }) => {
 
             setIsRunning(true);
             requestRef.current = requestAnimationFrame(animate);
-
         } else {
             // Lap / Finish for an athlete
             const currentElapsed = performance.now() - startTimeRef.current;
@@ -108,7 +107,7 @@ const Stopwatch = ({ onClose }) => {
                 </div>
 
                 {/* Controls */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                     <button
                         onClick={handleReset}
                         className="py-3 rounded-xl font-bold text-lg flex items-center justify-center transition-all bg-gray-700 hover:bg-gray-600 text-white"
@@ -118,24 +117,41 @@ const Stopwatch = ({ onClose }) => {
                     </button>
 
                     <button
-                        onClick={handleAction}
-                        disabled={finishes.length >= 5}
+                        onClick={stopTimer}
+                        disabled={!isRunning}
                         className={`py-3 rounded-xl font-bold text-lg flex items-center justify-center transition-all ${isRunning
-                            ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                            : finishes.length >= 5
-                                ? 'bg-gray-600 cursor-not-allowed text-gray-400'
-                                : 'bg-green-600 hover:bg-green-700 text-white'
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'
+                            }`}
+                    >
+                        <Square className="mr-2 w-5 h-5 fill-current" />
+                        Stop
+                    </button>
+
+                    <button
+                        onClick={handleAction}
+                        disabled={!isRunning && finishes.length >= 5}
+                        className={`py-3 rounded-xl font-bold text-lg flex items-center justify-center transition-all ${isRunning
+                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                : finishes.length >= 5
+                                    ? 'bg-gray-600 cursor-not-allowed text-gray-400'
+                                    : 'bg-green-600 hover:bg-green-700 text-white' // Resume or Start
                             }`}
                     >
                         {isRunning ? (
                             <>
                                 <Flag className="mr-2 w-5 h-5" />
-                                Record Split
+                                Split
+                            </>
+                        ) : finishes.length > 0 && finishes.length < 5 ? (
+                            <>
+                                <Play className="mr-2 w-5 h-5" />
+                                Resume
                             </>
                         ) : (
                             <>
                                 <Play className="mr-2 w-5 h-5" />
-                                Start Race
+                                Start
                             </>
                         )}
                     </button>
