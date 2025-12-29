@@ -16,12 +16,21 @@ const Stopwatch = ({ onClose }) => {
     };
 
     const handleAction = () => {
-        if (!isRunning && finishes.length === 0) {
-            // Start
+        if (!isRunning) {
+            // Start or Resume
+            const now = performance.now();
+            if (finishes.length === 0 && elapsed === 0) {
+                // Fresh Start
+                startTimeRef.current = now;
+            } else {
+                // Resume: adjust start time so that (now - newStart) = elapsed
+                startTimeRef.current = now - elapsed;
+            }
+
             setIsRunning(true);
-            startTimeRef.current = performance.now();
             requestRef.current = requestAnimationFrame(animate);
-        } else if (isRunning) {
+
+        } else {
             // Lap / Finish for an athlete
             const currentElapsed = performance.now() - startTimeRef.current;
             const newFinishes = [...finishes, currentElapsed];
