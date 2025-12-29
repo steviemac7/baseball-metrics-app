@@ -442,7 +442,9 @@ const BulkMetricEntry = () => {
                 </div>
             </div>
             {isStopwatchOpen && (
-                <Stopwatch onClose={() => setIsStopwatchOpen(false)} />
+                <div className="mt-8">
+                    <Stopwatch onClose={() => setIsStopwatchOpen(false)} embedded={true} />
+                </div>
             )}
         </div>
     );
