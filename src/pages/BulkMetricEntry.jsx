@@ -239,7 +239,10 @@ const BulkMetricEntry = () => {
                                 <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold mr-3 border border-gray-600">
                                     {user.name.charAt(0)}
                                 </div>
-                                <span className="font-medium text-gray-200">{user.name}</span>
+                                <div className="flex flex-col">
+                                    <span className="font-medium text-gray-200">{user.name}</span>
+                                    {user.nickname && <span className="text-xs text-blue-400 italic">"{user.nickname}"</span>}
+                                </div>
                             </div>
                             <input
                                 type="number"
