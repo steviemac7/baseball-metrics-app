@@ -211,4 +211,4 @@ const DistanceCalculator = ({ onClose, onSelect, embedded = false }) => {
 
 export default DistanceCalculator;
 
-export default DistanceCalculator;
+// End of file
