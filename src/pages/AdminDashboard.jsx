@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
-import { Plus, ChevronRight, User as UserIcon, Trash2, Ruler, List } from 'lucide-react';
+import { Plus, ChevronRight, User as UserIcon, Trash2, Ruler, List, Upload } from 'lucide-react';
 import AddUserModal from '../components/AddUserModal';
+import BulkUserImportModal from '../components/BulkUserImportModal';
 import DistanceCalculator from '../components/DistanceCalculator';
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isCalcOpen, setIsCalcOpen] = useState(false);
 
     useEffect(() => {
@@ -71,6 +73,13 @@ const AdminDashboard = () => {
                         <List className="w-5 h-5 mr-2" />
                         Bulk Entry
                     </Link>
+                    <button
+                        onClick={() => setIsUploadModalOpen(true)}
+                        className="flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg border border-gray-600 transition-all font-medium"
+                    >
+                        <Upload className="w-5 h-5 mr-2" />
+                        Import CSV
+                    </button>
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg shadow-blue-500/30 transition-all"
@@ -140,6 +149,15 @@ const AdminDashboard = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onAdd={handleAddUser}
+            />
+
+            <BulkUserImportModal
+                isOpen={isUploadModalOpen}
+                onClose={() => {
+                    setIsUploadModalOpen(false);
+                    loadUsers();
+                }}
+                onImport={handleAddUser}
             />
 
             {isCalcOpen && (
