@@ -71,21 +71,21 @@ const AdminDashboard = () => {
                         className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-500/30 transition-all"
                     >
                         <List className="w-5 h-5 mr-2" />
-                        Bulk Entry
+                        Bulk Metric Entry
                     </Link>
                     <button
                         onClick={() => setIsUploadModalOpen(true)}
                         className="flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg border border-gray-600 transition-all font-medium"
                     >
                         <Upload className="w-5 h-5 mr-2" />
-                        Import CSV
+                        Import Athlete List (CSV)
                     </button>
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg shadow-blue-500/30 transition-all"
                     >
                         <Plus className="w-5 h-5 mr-2" />
-                        Add New Athlete
+                        Manually Add New Athlete
                     </button>
                 </div>
             </div>
