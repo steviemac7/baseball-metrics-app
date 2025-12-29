@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import AdminDashboard from './pages/AdminDashboard';
 import UserProfile from './pages/UserProfile';
 import SummaryStats from './pages/SummaryStats';
+import BulkMetricEntry from './pages/BulkMetricEntry';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -38,6 +39,7 @@ const AppRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path="user/:id" element={<UserProfile />} />
         <Route path="stats" element={<SummaryStats />} />
+        <Route path="admin/bulk-entry" element={<BulkMetricEntry />} />
       </Route>
     </Routes>
   );

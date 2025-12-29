@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
-import { Plus, ChevronRight, User as UserIcon, Trash2, Ruler } from 'lucide-react';
+import { Plus, ChevronRight, User as UserIcon, Trash2, Ruler, List } from 'lucide-react';
 import AddUserModal from '../components/AddUserModal';
 import DistanceCalculator from '../components/DistanceCalculator';
 
@@ -64,6 +64,13 @@ const AdminDashboard = () => {
                         <Ruler className="w-5 h-5 mr-2" />
                         GPS Tool
                     </button>
+                    <Link
+                        to="/admin/bulk-entry"
+                        className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-500/30 transition-all"
+                    >
+                        <List className="w-5 h-5 mr-2" />
+                        Bulk Entry
+                    </Link>
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg shadow-blue-500/30 transition-all"
