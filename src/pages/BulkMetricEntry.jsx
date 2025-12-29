@@ -257,6 +257,10 @@ const BulkMetricEntry = () => {
         setAssigningSplit({ index, value });
     };
 
+    const handleUseGpsDistance = (distance) => {
+        setAssigningSplit({ index: 'GPS', value: distance });
+    };
+
     const handleSelectAthlete = (userId, userName) => {
         if (!assigningSplit) return;
 
@@ -500,7 +504,11 @@ const BulkMetricEntry = () => {
             )}
             {isGpsOpen && (
                 <div className="mt-8">
-                    <DistanceCalculator onClose={() => setIsGpsOpen(false)} embedded={true} />
+                    <DistanceCalculator
+                        onClose={() => setIsGpsOpen(false)}
+                        embedded={true}
+                        onSelect={handleUseGpsDistance}
+                    />
                 </div>
             )}
 
