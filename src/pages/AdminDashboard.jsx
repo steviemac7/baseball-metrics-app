@@ -122,7 +122,7 @@ const AdminDashboard = () => {
                         {team} <span className="text-gray-500 text-sm ml-2">({teamUsers.length})</span>
                     </h3>
 
-                    <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-sm">
+                    <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto shadow-sm">
                         <table className="min-w-full divide-y divide-gray-700">
                             <thead className="bg-gray-900/50">
                                 <tr>
