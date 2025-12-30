@@ -1,13 +1,17 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Users, BarChart2, User, LogOut, Menu, X } from 'lucide-react';
+import { Users, BarChart2, User, LogOut, Menu, X, Timer, Ruler, List } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
+import Stopwatch from './Stopwatch';
+import DistanceCalculator from './DistanceCalculator';
 
 const Layout = () => {
     const { user, logout } = useAuth();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isStopwatchOpen, setIsStopwatchOpen] = useState(false);
+    const [isCalcOpen, setIsCalcOpen] = useState(false);
 
     // Define navigation items based on role
     const navItems = [];
@@ -15,6 +19,9 @@ const Layout = () => {
     if (user?.role === 'ADMIN') {
         navItems.push({ name: 'Dashboard', path: '/', icon: Users });
         navItems.push({ name: 'Summary Stats', path: '/stats', icon: BarChart2 });
+        navItems.push({ name: 'Bulk Entry', path: '/admin/bulk-entry', icon: List });
+        navItems.push({ name: 'Stopwatch', icon: Timer, action: () => setIsStopwatchOpen(true) });
+        navItems.push({ name: 'GPS Tool', icon: Ruler, action: () => setIsCalcOpen(true) });
     } else {
         // Regular user sees their own profile
         navItems.push({ name: 'My Profile', path: '/', icon: User });
@@ -49,7 +56,25 @@ const Layout = () => {
                     <nav className="flex-1 px-4 py-6 space-y-2">
                         {navItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = location.pathname === item.path;
+                            // For action items, they are never "active" in the navigation sense
+                            const isActive = item.path && location.pathname === item.path;
+
+                            if (item.action) {
+                                return (
+                                    <button
+                                        key={item.name}
+                                        onClick={() => {
+                                            item.action();
+                                            setIsMobileMenuOpen(false);
+                                        }}
+                                        className="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors text-gray-400 hover:bg-gray-700/50 hover:text-white"
+                                    >
+                                        <Icon className="mr-3 h-5 w-5" />
+                                        {item.name}
+                                    </button>
+                                );
+                            }
+
                             return (
                                 <Link
                                     key={item.path}
@@ -94,6 +119,14 @@ const Layout = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="fixed inset-0 bg-black/50 z-30 lg:hidden"
                 />
+            )}
+
+            {/* Global Tools */}
+            {isStopwatchOpen && (
+                <Stopwatch onClose={() => setIsStopwatchOpen(false)} />
+            )}
+            {isCalcOpen && (
+                <DistanceCalculator onClose={() => setIsCalcOpen(false)} />
             )}
         </div>
     );
