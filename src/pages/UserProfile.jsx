@@ -5,7 +5,7 @@ import { dataService } from '../services/dataService';
 import TrendChart from '../components/TrendChart';
 import DistanceCalculator from '../components/DistanceCalculator';
 import Stopwatch from '../components/Stopwatch';
-import { Plus, Table, TrendingUp, Trash2, Ruler, Timer } from 'lucide-react';
+import { Plus, Table, TrendingUp, Trash2, Ruler, Timer, X } from 'lucide-react';
 import clsx from 'clsx';
 import { METRIC_GROUPS } from '../utils/constants';
 
@@ -22,7 +22,9 @@ const UserProfile = () => {
     const [inputState, setInputState] = useState({});
     const [showGpsModal, setShowGpsModal] = useState(false);
     const [gpsTargetMetric, setGpsTargetMetric] = useState(null);
+    const [gpsTargetMetric, setGpsTargetMetric] = useState(null);
     const [isStopwatchOpen, setIsStopwatchOpen] = useState(false);
+    const [selectedDataPoint, setSelectedDataPoint] = useState(null);
 
     const STOPWATCH_METRICS = [
         'dash_60', 'dash_30', 'home_to_2b', 'steal_2b', // Foot Speed
@@ -285,7 +287,15 @@ const UserProfile = () => {
                                             <h5 className="text-sm font-medium text-gray-400 flex items-center">
                                                 <TrendingUp className="w-4 h-4 mr-2" /> Recent Trend
                                             </h5>
-                                            <TrendChart data={history} metricName={metric.label} unit={metric.unit} />
+                                            <h5 className="text-sm font-medium text-gray-400 flex items-center">
+                                                <TrendingUp className="w-4 h-4 mr-2" /> Recent Trend
+                                            </h5>
+                                            <TrendChart
+                                                data={history}
+                                                metricName={metric.label}
+                                                unit={metric.unit}
+                                                onDataPointClick={(point) => setSelectedDataPoint({ ...point, metricLabel: metric.label, unit: metric.unit })}
+                                            />
 
                                             <details className="group">
                                                 <summary className="flex items-center text-sm text-gray-400 cursor-pointer hover:text-white">
@@ -345,6 +355,54 @@ const UserProfile = () => {
             )}
             {isStopwatchOpen && (
                 <Stopwatch onClose={() => setIsStopwatchOpen(false)} />
+            )}
+
+            {/* Metric Detail Modal */}
+            {selectedDataPoint && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setSelectedDataPoint(null)}>
+                    <div className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 max-w-sm w-full p-6 relative" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setSelectedDataPoint(null)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <h3 className="text-xl font-bold text-white mb-1">{selectedDataPoint.metricLabel}</h3>
+                        <p className="text-gray-400 text-sm mb-6">Data Point Details</p>
+
+                        <div className="space-y-4">
+                            <div className="bg-gray-700/50 p-4 rounded-lg">
+                                <p className="text-sm text-gray-400 mb-1">Date</p>
+                                <p className="text-lg font-medium text-white">
+                                    {new Date(selectedDataPoint.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-700/50 p-4 rounded-lg">
+                                <p className="text-sm text-gray-400 mb-1">Value</p>
+                                <p className="text-3xl font-bold text-blue-400">
+                                    {selectedDataPoint.value} <span className="text-lg font-normal text-gray-500">{selectedDataPoint.unit}</span>
+                                </p>
+                            </div>
+
+                            {isAdmin && (
+                                <button
+                                    onClick={async () => {
+                                        if (window.confirm('Are you sure you want to delete this specific entry?')) {
+                                            await handleDeleteMetric(selectedDataPoint.id);
+                                            setSelectedDataPoint(null);
+                                        }
+                                    }}
+                                    className="w-full mt-4 flex items-center justify-center px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors border border-red-500/20"
+                                >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete Entry
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
