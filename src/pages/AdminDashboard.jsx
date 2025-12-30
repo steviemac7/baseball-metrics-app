@@ -104,7 +104,7 @@ const AdminDashboard = () => {
                         <table className="min-w-full divide-y divide-gray-700">
                             <thead className="bg-gray-900/50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider sticky left-0 z-20 bg-gray-900">
                                         Athlete
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
                                         onClick={() => navigate(`/user/${user.id}`)}
                                         className="hover:bg-gray-700/50 cursor-pointer transition-colors group"
                                     >
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-6 py-4 whitespace-nowrap sticky left-0 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-10 w-10">
                                                     <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold border border-gray-600">

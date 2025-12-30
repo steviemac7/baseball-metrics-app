@@ -272,8 +272,8 @@ const SummaryStats = () => {
                         <table className="w-full text-left text-sm text-gray-400">
                             <thead className="bg-gray-900/50 text-xs uppercase text-gray-500">
                                 <tr>
-                                    <th className="px-6 py-3">Rank</th>
-                                    <th className="px-6 py-3">Athlete</th>
+                                    <th className="px-6 py-3 sticky left-0 z-20 bg-gray-900 w-20">Rank</th>
+                                    <th className="px-6 py-3 sticky left-20 z-20 bg-gray-900">Athlete</th>
                                     <th className="px-6 py-3">Team</th>
                                     <th className="px-6 py-3">Age</th>
                                     <th className="px-6 py-3 text-right">Value ({selectedMetricDef?.unit})</th>
@@ -299,9 +299,9 @@ const SummaryStats = () => {
                                     }
 
                                     return (
-                                        <tr key={data.user.id} className={clsx("transition-colors", isMe ? "bg-blue-500/10 hover:bg-blue-500/20" : "hover:bg-gray-700/30")}>
-                                            <td className="px-6 py-4 font-mono text-gray-500">#{idx + 1}</td>
-                                            <td className="px-6 py-4 flex items-center text-white font-medium">
+                                        <tr key={data.user.id} className={clsx("transition-colors group", isMe ? "bg-blue-500/10 hover:bg-blue-500/20" : "hover:bg-gray-700/30")}>
+                                            <td className="px-6 py-4 font-mono text-gray-500 sticky left-0 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors w-20">#{idx + 1}</td>
+                                            <td className="px-6 py-4 flex items-center font-medium sticky left-20 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors text-white">
                                                 <User className={clsx("w-4 h-4 mr-2", isMe ? "text-blue-400" : "text-gray-600")} />
                                                 {showName ? data.user.name : `Athlete ${idx + 1}`}
                                                 {isMe && <span className="ml-2 text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">You</span>}
