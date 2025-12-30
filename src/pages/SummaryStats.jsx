@@ -72,6 +72,7 @@ const SummaryStats = () => {
     // Aggregate Data for Selected Metric
     const metricData = useMemo(() => {
         // For each filtered user, get their LATEST value for the selected metric
+        // For each filtered user, calculate the AVERAGE value for the selected metric in the date range
         const dataPoints = filteredUsers.map(user => {
             const userMetrics = metrics
                 .filter(m => {
@@ -82,11 +83,29 @@ const SummaryStats = () => {
                     if (filters.endDate && new Date(m.date) > new Date(filters.endDate)) return false;
 
                     return true;
-                })
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
+                });
 
-            const latest = userMetrics[0];
-            return latest ? { user, value: latest.value, date: latest.date } : null;
+            if (userMetrics.length === 0) return null;
+
+            // Calculate Average, Min, Max of all points
+            const values = userMetrics.map(m => Number(m.value));
+            const total = values.reduce((sum, v) => sum + v, 0);
+            const average = total / values.length;
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+
+            // Get latest date for display purposes
+            const sortedByDate = [...userMetrics].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const latestDate = sortedByDate[0].date;
+
+            return {
+                user,
+                value: Number(average.toFixed(2)),
+                date: latestDate,
+                count: userMetrics.length,
+                min: min,
+                max: max
+            };
         }).filter(Boolean);
 
         // Sort by value (descending usually, unless 'time' metric which is ascending)
@@ -276,7 +295,10 @@ const SummaryStats = () => {
                                     <th className="px-6 py-3 sticky left-20 z-20 bg-gray-900">Athlete</th>
                                     <th className="px-6 py-3">Team</th>
                                     <th className="px-6 py-3">Age</th>
-                                    <th className="px-6 py-3 text-right">Value ({selectedMetricDef?.unit})</th>
+                                    <th className="px-6 py-3 text-right">Avg Value ({selectedMetricDef?.unit})</th>
+                                    <th className="px-6 py-3 text-right">Min</th>
+                                    <th className="px-6 py-3 text-right">Max</th>
+                                    <th className="px-6 py-3 text-right">Samples</th>
                                     <th className="px-6 py-3 text-right">Date</th>
                                 </tr>
                             </thead>
@@ -311,6 +333,9 @@ const SummaryStats = () => {
                                             <td className="px-6 py-4 text-right text-lg font-bold text-blue-400">
                                                 {data.value}
                                             </td>
+                                            <td className="px-6 py-4 text-right text-gray-400">{data.min}</td>
+                                            <td className="px-6 py-4 text-right text-gray-400">{data.max}</td>
+                                            <td className="px-6 py-4 text-right text-gray-400">{data.count}</td>
                                             <td className="px-6 py-4 text-right">
                                                 {new Date(data.date).toLocaleDateString()}
                                             </td>

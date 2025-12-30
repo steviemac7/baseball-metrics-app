@@ -1,4 +1,5 @@
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { useMemo } from 'react';
 
 const CustomTooltip = ({ active, payload, label, unit, metricName }) => {
     if (active && payload && payload.length) {
@@ -35,23 +36,45 @@ const TrendChart = ({ data, metricName, unit, onDataPointClick }) => {
         );
     }
 
-    // Sort data by date and add a unique index for the X-axis mapping
-    const sortedData = [...data]
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .map((item, index) => ({ ...item, uniqueIdx: index }));
+    // Sort data by date
+    const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Calculate Daily Averages for the Trend Line
+    const dailyAverages = useMemo(() => {
+        const grouped = {};
+        sortedData.forEach(item => {
+            if (!grouped[item.date]) {
+                grouped[item.date] = { sum: 0, count: 0, date: item.date };
+            }
+            grouped[item.date].sum += Number(item.value);
+            grouped[item.date].count += 1;
+        });
+
+        return Object.values(grouped)
+            .map(g => ({
+                date: g.date,
+                average: Number((g.sum / g.count).toFixed(2))
+            }))
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+    }, [sortedData]);
 
     return (
         <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={sortedData}>
+                <LineChart>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis
-                        dataKey="uniqueIdx"
+                        dataKey="date"
                         type="category"
+                        allowDuplicatedCategory={false}
+                        data={dailyAverages} // Drive the axis with unique dates
                         stroke="#9CA3AF"
-                        tickFormatter={(uniqueIdx) => {
-                            const item = sortedData[uniqueIdx];
-                            return item ? new Date(item.date).toLocaleDateString() : '';
+                        tickFormatter={(dateStr) => {
+                            if (!dateStr) return '';
+                            return new Date(dateStr + 'T12:00:00').toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric'
+                            });
                         }}
                         fontSize={12}
                     />
@@ -62,22 +85,40 @@ const TrendChart = ({ data, metricName, unit, onDataPointClick }) => {
                         isAnimationActive={false}
                         trigger="hover"
                     />
+
+                    {/* Raw Data Points (Vertical Stack, No Line) */}
                     <Line
+                        data={sortedData}
                         type="monotone"
                         dataKey="value"
-                        stroke="#3B82F6"
+                        stroke="none" // No connecting line for raw stats
+                        isAnimationActive={false}
+                        dot={{
+                            fill: '#60A5FA', // Lighter blue for raw dots
+                            r: 3,
+                            strokeWidth: 0,
+                            cursor: 'pointer',
+                            onClick: (props) => onDataPointClick && onDataPointClick(props.payload)
+                        }}
+                        activeDot={{ r: 5 }}
+                        name="Individual Reading"
+                    />
+
+                    {/* Daily Average Line (Red Dots) */}
+                    <Line
+                        data={dailyAverages}
+                        type="monotone"
+                        dataKey="average"
+                        stroke="#EF4444" // Red connecting line
                         strokeWidth={2}
                         dot={{
-                            fill: '#3B82F6',
+                            fill: '#EF4444', // Red dots
+                            stroke: '#EF4444',
                             r: 4,
-                            cursor: 'pointer',
-                            onClick: (props) => onDataPointClick && onDataPointClick(props.payload)
+                            cursor: 'pointer'
                         }}
-                        activeDot={{
-                            r: 6,
-                            cursor: 'pointer',
-                            onClick: (props) => onDataPointClick && onDataPointClick(props.payload)
-                        }}
+                        activeDot={{ r: 6, fill: '#EF4444' }}
+                        name="Daily Avg"
                     />
                 </LineChart>
             </ResponsiveContainer>
