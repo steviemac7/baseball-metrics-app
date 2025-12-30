@@ -160,10 +160,25 @@ const BulkMetricEntry = () => {
     };
 
     const updateUserValue = (userId, userName, value) => {
-        setValues(prev => ({
-            ...prev,
-            [userId]: value
-        }));
+        setValues(prev => {
+            const existingValue = prev[userId];
+            // If there's an existing value and it's for a multi-entry metric (mph or distance), append it
+            // For now, let's assume if it's not empty, we append, or simpler: just check metric type?
+            // User requested appending for GPS, which implies text handling.
+
+            // Actually, we should probably only append if it's appropriate. 
+            // But for GPS usage, the user specifically asked "If the user assigns multiple values... keep appending"
+
+            let newValue = value;
+            if (existingValue && String(existingValue).trim() !== '') {
+                newValue = `${existingValue} ${value}`;
+            }
+
+            return {
+                ...prev,
+                [userId]: newValue
+            };
+        });
         setVoiceFeedback({ type: 'success', message: `Set ${userName}: ${value}` });
 
         // Clear feedback after 3s
@@ -201,13 +216,17 @@ const BulkMetricEntry = () => {
         setSaving(true);
         try {
             const promises = [];
-            const isMph = getSelectedMetricUnit() === 'mph';
+            // const isMph = getSelectedMetricUnit() === 'mph'; // Removed in favor of dynamic check inside loop or helper
 
             // Iterate through all users who have a value entered
             for (const [userId, value] of Object.entries(values)) {
                 // Ensure value is handled as a string for validation, but keep original type for saving if needed
                 if (value !== null && value !== undefined && String(value).trim() !== '') {
-                    if (isMph) {
+                    // Check for multi-value types: mph or feet
+                    const unit = getSelectedMetricUnit();
+                    const isMultiValue = unit === 'mph' || unit === 'ft' || unit === 'feet';
+
+                    if (isMultiValue) {
                         // Split by comma or space
                         const parts = String(value).split(/[\s,]+/).filter(v => v.trim() !== '');
                         parts.forEach(part => {
@@ -478,9 +497,9 @@ const BulkMetricEntry = () => {
                                 </div>
                             </div>
                             <input
-                                type={getSelectedMetricUnit() === 'mph' ? 'text' : 'number'}
+                                type={['mph', 'ft', 'feet'].includes(getSelectedMetricUnit()) ? 'text' : 'number'}
                                 step="any"
-                                placeholder={getSelectedMetricUnit() === 'mph' ? "e.g. 90 85 88" : getSelectedMetricUnit()}
+                                placeholder={['mph', 'ft', 'feet'].includes(getSelectedMetricUnit()) ? "e.g. 90 85 88" : getSelectedMetricUnit()}
                                 value={values[user.id] || ''}
                                 onChange={(e) => handleValueChange(user.id, e.target.value)}
                                 onWheel={(e) => e.target.blur()} // Prevent accidentally changing value while scrolling
