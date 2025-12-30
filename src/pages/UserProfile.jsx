@@ -22,7 +22,6 @@ const UserProfile = () => {
     const [inputState, setInputState] = useState({});
     const [showGpsModal, setShowGpsModal] = useState(false);
     const [gpsTargetMetric, setGpsTargetMetric] = useState(null);
-    const [gpsTargetMetric, setGpsTargetMetric] = useState(null);
     const [isStopwatchOpen, setIsStopwatchOpen] = useState(false);
     const [selectedDataPoint, setSelectedDataPoint] = useState(null);
 
