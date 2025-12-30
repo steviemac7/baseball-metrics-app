@@ -286,9 +286,6 @@ const UserProfile = () => {
                                             <h5 className="text-sm font-medium text-gray-400 flex items-center">
                                                 <TrendingUp className="w-4 h-4 mr-2" /> Recent Trend
                                             </h5>
-                                            <h5 className="text-sm font-medium text-gray-400 flex items-center">
-                                                <TrendingUp className="w-4 h-4 mr-2" /> Recent Trend
-                                            </h5>
                                             <TrendChart
                                                 data={history}
                                                 metricName={metric.label}
