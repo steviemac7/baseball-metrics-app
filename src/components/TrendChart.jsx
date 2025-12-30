@@ -1,5 +1,29 @@
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
+const CustomTooltip = ({ active, payload, label, unit, metricName }) => {
+    if (active && payload && payload.length) {
+        // Safe date formatting to avoid timezone shifts
+        // Assuming label is "YYYY-MM-DD"
+        const dateStr = label;
+        const displayDate = new Date(dateStr + 'T12:00:00').toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        return (
+            <div className="bg-gray-800 border border-gray-700 p-3 rounded-lg shadow-xl">
+                <p className="text-gray-400 text-xs mb-1">{displayDate}</p>
+                <p className="text-blue-400 font-bold text-lg">
+                    {payload[0].value} <span className="text-sm font-normal text-gray-500">{unit}</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-1">{metricName}</p>
+            </div>
+        );
+    }
+    return null;
+};
+
 const TrendChart = ({ data, metricName, unit, onDataPointClick }) => {
     if (!data || data.length === 0) {
         return (
@@ -25,10 +49,10 @@ const TrendChart = ({ data, metricName, unit, onDataPointClick }) => {
                     />
                     <YAxis stroke="#9CA3AF" fontSize={12} domain={['auto', 'auto']} />
                     <Tooltip
-                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#fff' }}
-                        itemStyle={{ color: '#60A5FA' }}
-                        formatter={(value) => [`${value} ${unit || ''}`, metricName]}
-                        labelFormatter={(label) => new Date(label).toLocaleDateString()}
+                        content={<CustomTooltip unit={unit} metricName={metricName} />}
+                        cursor={{ stroke: '#6B7280', strokeWidth: 1 }}
+                        isAnimationActive={false}
+                        trigger="hover"
                     />
                     <Line
                         type="monotone"
