@@ -35,8 +35,10 @@ const TrendChart = ({ data, metricName, unit, onDataPointClick }) => {
         );
     }
 
-    // Sort data by date
-    const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Sort data by date and add a unique index for the X-axis mapping
+    const sortedData = [...data]
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map((item, index) => ({ ...item, uniqueIdx: index }));
 
     return (
         <div className="h-64 w-full">
@@ -44,9 +46,11 @@ const TrendChart = ({ data, metricName, unit, onDataPointClick }) => {
                 <LineChart data={sortedData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis
+                        dataKey="uniqueIdx"
+                        type="category"
                         stroke="#9CA3AF"
-                        tickFormatter={(index) => {
-                            const item = sortedData[index];
+                        tickFormatter={(uniqueIdx) => {
+                            const item = sortedData[uniqueIdx];
                             return item ? new Date(item.date).toLocaleDateString() : '';
                         }}
                         fontSize={12}
