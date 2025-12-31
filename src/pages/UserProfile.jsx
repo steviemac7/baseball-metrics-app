@@ -505,8 +505,24 @@ const UserProfile = () => {
     const renderMetricInput = (metric, group) => {
         if (!isAdmin) return null;
 
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            const val = inputState[metric.id];
+            if (!val || isNaN(parseFloat(val))) return;
+
+            const date = document.getElementById(`date-${metric.id}`).value;
+            await dataService.addMetric({
+                userId: profileUser.id,
+                date,
+                metricId: metric.id,
+                value: parseFloat(val)
+            });
+            setInputState({ ...inputState, [metric.id]: '' });
+            loadData();
+        };
+
         return (
-            <div className="flex items-center space-x-2 mt-2">
+            <form onSubmit={handleSubmit} className="flex items-center space-x-2 mt-2">
                 <input
                     type="date"
                     className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm text-white"
@@ -515,6 +531,7 @@ const UserProfile = () => {
                 />
                 <input
                     type="number"
+                    inputMode="decimal"
                     step="0.01"
                     placeholder={`${metric.unit}`}
                     className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm text-white w-24"
@@ -524,6 +541,7 @@ const UserProfile = () => {
 
                 {metric.id === 'dist_tee' && (
                     <button
+                        type="button"
                         onClick={() => {
                             setGpsTargetMetric(metric.id);
                             setShowGpsModal(true);
@@ -536,6 +554,7 @@ const UserProfile = () => {
                 )}
                 {STOPWATCH_METRICS.includes(metric.id) && (
                     <button
+                        type="button"
                         onClick={() => setIsStopwatchOpen(true)}
                         className="p-1 px-2 bg-gray-700 border border-gray-600 text-green-400 hover:bg-gray-600 rounded flex items-center"
                         title="Open Stopwatch"
@@ -544,6 +563,7 @@ const UserProfile = () => {
                     </button>
                 )}
                 <button
+                    type="button"
                     onClick={() => toggleMic(metric.id)}
                     className={clsx(
                         "p-1 px-2 border rounded flex items-center transition-all",
@@ -564,22 +584,13 @@ const UserProfile = () => {
                     </span>
                 )}
                 <button
-                    onClick={async () => {
-                        const date = document.getElementById(`date-${metric.id}`).value;
-                        await dataService.addMetric({
-                            userId: profileUser.id,
-                            date,
-                            metricId: metric.id,
-                            value: parseFloat(inputState[metric.id])
-                        });
-                        setInputState({ ...inputState, [metric.id]: '' });
-                        loadData();
-                    }}
+                    type="submit"
                     className="p-1 bg-blue-600 rounded text-white hover:bg-blue-700"
+                    title="Add Entry"
                 >
                     <Plus size={16} />
                 </button>
-            </div>
+            </form>
         );
     };
 
