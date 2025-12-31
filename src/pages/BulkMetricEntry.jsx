@@ -498,6 +498,7 @@ const BulkMetricEntry = () => {
                             </div>
                             <input
                                 type={['mph', 'ft', 'feet'].includes(getSelectedMetricUnit()) ? 'text' : 'number'}
+                                inputMode="decimal"
                                 step="any"
                                 placeholder={['mph', 'ft', 'feet'].includes(getSelectedMetricUnit()) ? "e.g. 90 85 88" : getSelectedMetricUnit()}
                                 value={values[user.id] || ''}
