@@ -10,7 +10,9 @@ export const METRIC_GROUPS = {
         { id: 'if_loss', label: 'Infield - Live Fungo', unit: 'mph' },
         { id: 'of_glove', label: 'Outfield - Ball in Glove', unit: 'mph' },
         { id: 'of_loss', label: 'Outfield - Live Fungo', unit: 'mph' },
-        { id: 'c_to_2b_glove', label: 'Catcher to 2B - Glove', unit: 'mph' },
+    ],
+    'Catcher Throwing': [
+        { id: 'c_to_2b_glove', label: 'Catcher to 2B - Ball in Glove', unit: 'mph' },
         { id: 'c_to_2b_live', label: 'Catcher to 2B - Live', unit: 'mph' },
         { id: 'pop_2b', label: 'Pop Time to 2B', unit: 'sec' },
         { id: 'pop_3b', label: 'Pop Time to 3B', unit: 'sec' },

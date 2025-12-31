@@ -146,7 +146,7 @@ const SummaryStats = () => {
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 className="text-3xl font-bold text-white">Summary Statistics</h2>
+                <h2 className="text-3xl font-bold text-white">Athlete Comparison</h2>
             </div>
 
             {/* Controls */}
@@ -252,7 +252,7 @@ const SummaryStats = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Stats Card */}
                 <div className="lg:col-span-1 bg-gray-800 rounded-xl p-6 border border-gray-700 h-fit">
-                    <h3 className="text-xl font-bold text-white mb-4">Analysis</h3>
+                    <h3 className="text-xl font-bold text-white mb-4">Summary Statistics</h3>
                     {stats ? (
                         <div className="space-y-4">
                             <div className="flex justify-between items-center p-3 bg-gray-700/50 rounded-lg">
@@ -291,8 +291,8 @@ const SummaryStats = () => {
                         <table className="w-full text-left text-sm text-gray-400">
                             <thead className="bg-gray-900/50 text-xs uppercase text-gray-500">
                                 <tr>
-                                    <th className="px-6 py-3 sticky left-0 z-20 bg-gray-900 w-20">Rank</th>
-                                    <th className="px-6 py-3 sticky left-20 z-20 bg-gray-900">Athlete</th>
+                                    <th className="px-2 py-3 sticky left-0 z-20 bg-gray-900 w-12 text-center">Rank</th>
+                                    <th className="px-6 py-3 sticky left-12 z-20 bg-gray-900">Athlete</th>
                                     <th className="px-6 py-3">Team</th>
                                     <th className="px-6 py-3">Age</th>
                                     <th className="px-6 py-3 text-right">Avg Value ({selectedMetricDef?.unit})</th>
@@ -322,8 +322,8 @@ const SummaryStats = () => {
 
                                     return (
                                         <tr key={data.user.id} className={clsx("transition-colors group", isMe ? "bg-blue-500/10 hover:bg-blue-500/20" : "hover:bg-gray-700/30")}>
-                                            <td className="px-6 py-4 font-mono text-gray-500 sticky left-0 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors w-20">#{idx + 1}</td>
-                                            <td className="px-6 py-4 flex items-center font-medium sticky left-20 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors text-white">
+                                            <td className="px-2 py-4 font-mono text-gray-500 sticky left-0 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors w-12 text-center">#{idx + 1}</td>
+                                            <td className="px-6 py-4 flex items-center font-medium sticky left-12 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors text-white">
                                                 <User className={clsx("w-4 h-4 mr-2", isMe ? "text-blue-400" : "text-gray-600")} />
                                                 {showName ? data.user.name : `Athlete ${idx + 1}`}
                                                 {isMe && <span className="ml-2 text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">You</span>}
@@ -337,7 +337,7 @@ const SummaryStats = () => {
                                             <td className="px-6 py-4 text-right text-gray-400">{data.max}</td>
                                             <td className="px-6 py-4 text-right text-gray-400">{data.count}</td>
                                             <td className="px-6 py-4 text-right">
-                                                {new Date(data.date).toLocaleDateString()}
+                                                {new Date(data.date + 'T12:00:00').toLocaleDateString()}
                                             </td>
                                         </tr>
                                     );

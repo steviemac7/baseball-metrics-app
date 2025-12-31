@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 import { dataService } from '../services/dataService';
 import TrendChart from '../components/TrendChart';
 import DistanceCalculator from '../components/DistanceCalculator';
 import Stopwatch from '../components/Stopwatch';
-import { Plus, Table, TrendingUp, Trash2, Ruler, Timer, X } from 'lucide-react';
+import { Plus, Table, TrendingUp, Trash2, Ruler, Timer, X, Mic, MicOff } from 'lucide-react';
 import clsx from 'clsx';
 import { METRIC_GROUPS } from '../utils/constants';
 
@@ -24,6 +25,60 @@ const UserProfile = () => {
     const [gpsTargetMetric, setGpsTargetMetric] = useState(null);
     const [isStopwatchOpen, setIsStopwatchOpen] = useState(false);
     const [selectedDataPoint, setSelectedDataPoint] = useState(null);
+
+    // Voice Entry State
+    const [activeMicMetricId, setActiveMicMetricId] = useState(null);
+    const activeMicRef = useRef(null); // Ref to track active ID without re-binding effects
+    const [isListening, setIsListening] = useState(false);
+    const [voiceFeedback, setVoiceFeedback] = useState(null);
+
+    const recognition = useState(() => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return null;
+
+        const reco = new SpeechRecognition();
+        reco.continuous = true;
+        reco.interimResults = true;
+        reco.lang = 'en-US';
+        return reco;
+    })[0];
+
+    useEffect(() => {
+        if (!recognition) return;
+
+        recognition.onresult = (event) => {
+            const results = Array.from(event.results);
+            const latestResult = results[results.length - 1];
+
+            if (latestResult.isFinal) {
+                const transcript = latestResult[0].transcript.toLowerCase().trim();
+                // Use ref to call the latest version of the handler to avoid stale closures
+                if (handleVoiceCommandRef.current) {
+                    handleVoiceCommandRef.current(transcript);
+                }
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error", event.error);
+            setVoiceFeedback({ type: 'error', message: 'Mic Error' });
+            setIsListening(false);
+            setActiveMicMetricId(null);
+            activeMicRef.current = null;
+        };
+
+        recognition.onend = () => {
+            if (isListening) {
+                setIsListening(false);
+                setActiveMicMetricId(null);
+                activeMicRef.current = null;
+            }
+        };
+
+        return () => {
+            recognition.stop();
+        };
+    }, [recognition]); // Stable dependency
 
     const STOPWATCH_METRICS = [
         'dash_60', 'dash_30', 'home_to_2b', 'steal_2b', // Foot Speed
@@ -60,6 +115,101 @@ const UserProfile = () => {
             console.error("Load Data Error:", err);
             setError(err.message);
         }
+    };
+
+    // Voice command handler
+    const handleVoiceCommand = (transcript) => {
+        const currentMetricId = activeMicRef.current;
+        if (!currentMetricId) return;
+
+        // Check for "enter"
+        const hasEnter = transcript.includes('enter');
+
+        // Extract number
+        const numberMatch = transcript.match(/(\d+(\.\d+)?)/);
+
+        if (numberMatch) {
+            const val = numberMatch[0];
+            setInputState(prev => ({ ...prev, [currentMetricId]: val }));
+
+            if (hasEnter) {
+                handleAddMetric(currentMetricId, val);
+
+                setVoiceFeedback({ type: 'success', message: 'Saved!' });
+                setTimeout(() => setVoiceFeedback(null), 3000);
+            }
+        } else if (hasEnter) {
+            const currentVal = inputState[currentMetricId];
+            if (currentVal) {
+                handleAddMetric(currentMetricId, currentVal);
+                stopListening();
+            }
+        }
+    };
+
+    // Keep a ref to the latest handler
+    const handleVoiceCommandRef = useRef(handleVoiceCommand);
+    useEffect(() => {
+        handleVoiceCommandRef.current = handleVoiceCommand;
+    });
+
+    const startListening = (metricId) => {
+        if (!recognition) {
+            alert("Voice not supported.");
+            return;
+        }
+        try {
+            recognition.stop();
+            setActiveMicMetricId(metricId);
+            activeMicRef.current = metricId;
+            setIsListening(true);
+            recognition.start();
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const stopListening = () => {
+        if (recognition) recognition.stop();
+        setIsListening(false);
+        setActiveMicMetricId(null);
+        activeMicRef.current = null;
+    };
+
+    const toggleMic = (metricId) => {
+        if (activeMicMetricId === metricId && isListening) {
+            stopListening();
+        } else {
+            startListening(metricId);
+        }
+    };
+
+    const handleAddMetric = async (metricId, value) => {
+        if (!value) return;
+
+        await dataService.addMetric({
+            userId: profileUser.id,
+            date: new Date().toISOString().split('T')[0], // Today
+            metricId,
+            value: parseFloat(value)
+        });
+
+        // Clear input
+        setInputState(prev => ({ ...prev, [metricId]: '' }));
+        loadData();
+    };
+
+    const handleDeleteMetric = async (metricId) => {
+        if (window.confirm('Delete this entry?')) {
+            await dataService.deleteMetric(metricId);
+            loadData();
+        }
+    };
+
+    const getMetricHistory = (metricId) => {
+        return allMetrics
+            .filter(m => m.metricId === metricId)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
     };
 
     if (error) {
@@ -105,34 +255,6 @@ const UserProfile = () => {
 
     const isAdmin = currentUser.role === 'ADMIN';
 
-    const handleAddMetric = async (metricId, value) => {
-        if (!value) return;
-
-        await dataService.addMetric({
-            userId: profileUser.id,
-            date: new Date().toISOString().split('T')[0], // Today
-            metricId,
-            value: parseFloat(value)
-        });
-
-        // Clear input
-        setInputState({ ...inputState, [metricId]: '' });
-        loadData();
-    };
-
-    const handleDeleteMetric = async (metricId) => {
-        if (window.confirm('Delete this entry?')) {
-            await dataService.deleteMetric(metricId);
-            loadData();
-        }
-    };
-
-    const getMetricHistory = (metricId) => {
-        return allMetrics
-            .filter(m => m.metricId === metricId)
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
-    };
-
     const renderMetricInput = (metric, group) => {
         if (!isAdmin) return null;
 
@@ -173,6 +295,26 @@ const UserProfile = () => {
                     >
                         <Timer size={16} />
                     </button>
+                )}
+                <button
+                    onClick={() => toggleMic(metric.id)}
+                    className={clsx(
+                        "p-1 px-2 border rounded flex items-center transition-all",
+                        activeMicMetricId === metric.id && isListening
+                            ? "bg-red-500/20 border-red-500 text-red-500 animate-pulse"
+                            : "bg-gray-700 border-gray-600 text-gray-400 hover:text-white hover:bg-gray-600"
+                    )}
+                    title="Voice Entry"
+                >
+                    {activeMicMetricId === metric.id && isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                </button>
+                {activeMicMetricId === metric.id && voiceFeedback && (
+                    <span className={clsx(
+                        "text-xs px-2 py-1 rounded",
+                        voiceFeedback.type === 'error' ? "text-red-400 bg-red-500/10" : "text-green-400 bg-green-500/10"
+                    )}>
+                        {voiceFeedback.message}
+                    </span>
                 )}
                 <button
                     onClick={async () => {
