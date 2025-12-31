@@ -17,7 +17,7 @@ export const METRIC_GROUPS = {
         { id: 'pop_2b', label: 'Pop Time to 2B', unit: 'sec' },
         { id: 'pop_3b', label: 'Pop Time to 3B', unit: 'sec' },
     ],
-    'Pitching': [
+    'Pitching Velo': [
         { id: 'fb', label: 'Fastball', unit: 'mph' },
         { id: 'cb', label: 'Curveball', unit: 'mph' },
         { id: 'sl', label: 'Slider', unit: 'mph' },

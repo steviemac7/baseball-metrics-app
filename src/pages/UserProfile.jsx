@@ -647,7 +647,7 @@ const UserProfile = () => {
 
             {/* Tabs */}
             <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-700">
-                {['Biometric Data', 'Pitching Accuracy', ...Object.keys(METRIC_GROUPS)].map(tab => (
+                {['Biometric Data', 'Pitching Velo', 'Pitching Accuracy', ...Object.keys(METRIC_GROUPS).filter(k => k !== 'Pitching Velo')].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
