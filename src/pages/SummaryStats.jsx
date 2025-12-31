@@ -95,7 +95,11 @@ const SummaryStats = () => {
             const max = Math.max(...values);
 
             // Get latest date for display purposes
-            const sortedByDate = [...userMetrics].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const sortedByDate = [...userMetrics].sort((a, b) => {
+                const dDiff = new Date(b.date) - new Date(a.date);
+                if (dDiff !== 0) return dDiff;
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
             const latestDate = sortedByDate[0].date;
 
             return {
