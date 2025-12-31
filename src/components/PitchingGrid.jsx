@@ -154,10 +154,12 @@ const PitchingGrid = ({
     const sizeClasses = {
         sm: { grid: 'w-48 h-48', side: 'h-48', wSide: 'w-8', hTop: 'h-8' },
         md: { grid: 'w-72 h-72', side: 'h-72', wSide: 'w-12', hTop: 'h-12' },
-        lg: { grid: 'w-96 h-96', side: 'h-96', wSide: 'w-16', hTop: 'h-16' }
+        lg: { grid: 'w-96 h-96', side: 'h-96', wSide: 'w-16', hTop: 'h-16' },
+        // Container-responsive: Fits 375px mobile well
+        responsive: { grid: 'w-[260px] h-[260px]', side: 'h-[260px]', wSide: 'w-8', hTop: 'h-8' }
     };
 
-    const currentSize = sizeClasses[size] || sizeClasses.md;
+    const currentSize = size === 'responsive' ? sizeClasses.responsive : (sizeClasses[size] || sizeClasses.md);
 
     return (
         <div className="flex flex-col items-center gap-2 select-none">
@@ -175,16 +177,19 @@ const PitchingGrid = ({
             </div>
 
             <div className="flex items-center gap-2">
-                {/* Left Wild Zone (ID 19) */}
                 <div
                     onClick={(e) => handleSquareClick(e, 19)}
                     className={clsx(
-                        "relative rounded border border-gray-600 flex flex-col items-center justify-center cursor-pointer transition-colors",
+                        "relative rounded border border-gray-600 flex flex-col items-center justify-center cursor-pointer transition-colors flex-shrink-0",
                         currentSize.side, currentSize.wSide,
                         targetZones.includes(19) ? "bg-green-500/20" : "hover:bg-red-900/20 bg-gray-800/50"
                     )}
                 >
-                    {!renderSquare && <span className="text-[10px] text-gray-500 font-bold uppercase -rotate-90 whitespace-nowrap">Wild Left</span>}
+                    {!renderSquare && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <span className="text-[9px] text-gray-500 font-bold uppercase -rotate-90 whitespace-nowrap">L</span>
+                        </div>
+                    )}
                     {renderContent(19)}
                 </div>
 
@@ -217,16 +222,19 @@ const PitchingGrid = ({
                     })}
                 </div>
 
-                {/* Right Wild Zone (ID 20) */}
                 <div
                     onClick={(e) => handleSquareClick(e, 20)}
                     className={clsx(
-                        "relative rounded border border-gray-600 flex flex-col items-center justify-center cursor-pointer transition-colors",
+                        "relative rounded border border-gray-600 flex flex-col items-center justify-center cursor-pointer transition-colors flex-shrink-0",
                         currentSize.side, currentSize.wSide,
                         targetZones.includes(20) ? "bg-green-500/20" : "hover:bg-red-900/20 bg-gray-800/50"
                     )}
                 >
-                    {!renderSquare && <span className="text-[10px] text-gray-500 font-bold uppercase rotate-90 whitespace-nowrap">Wild Right</span>}
+                    {!renderSquare && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <span className="text-[9px] text-gray-500 font-bold uppercase rotate-90 whitespace-nowrap">R</span>
+                        </div>
+                    )}
                     {renderContent(20)}
                 </div>
             </div>

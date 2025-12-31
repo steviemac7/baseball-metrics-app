@@ -731,15 +731,15 @@ const UserProfile = () => {
                                     <div className="flex justify-start">
                                         <button
                                             onClick={handleSavePitchingSession}
-                                            className="flex items-center px-4 py-2 bg-blue-600 rounded text-white hover:bg-blue-700 transition space-x-2 text-sm"
+                                            className="flex items-center justify-center w-full md:w-auto px-4 py-2 bg-blue-600 rounded text-white hover:bg-blue-700 transition space-x-2 text-sm"
                                         >
                                             <Save size={16} />
                                             <span>Save Session</span>
                                         </button>
                                     </div>
                                 )}
-                                <div className="flex justify-between items-end w-full">
-                                    <div>
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-end w-full gap-4">
+                                    <div className="w-full md:w-auto">
                                         <label className="block text-sm font-medium text-gray-400 mb-2">New Session Date</label>
                                         <input
                                             type="date"
@@ -747,17 +747,17 @@ const UserProfile = () => {
                                             onChange={(e) => setPitchSession({ ...pitchSession, date: e.target.value })}
                                             disabled={isReviewMode}
                                             className={clsx(
-                                                "w-full bg-gray-700 text-white border border-gray-600 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none max-w-xs",
+                                                "w-full bg-gray-700 text-white border border-gray-600 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none md:max-w-xs",
                                                 isReviewMode && "opacity-70 cursor-not-allowed"
                                             )}
                                         />
                                     </div>
 
                                     {/* Review Historical Session */}
-                                    <div>
+                                    <div className="w-full md:w-auto">
                                         <label className="block text-sm font-medium text-gray-400 mb-2">Review Historical Session</label>
                                         <select
-                                            className="bg-gray-700 border border-gray-600 rounded px-2 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 min-w-[200px]"
+                                            className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 md:min-w-[200px]"
                                             onChange={(e) => {
                                                 if (e.target.value === "") return;
                                                 const session = pitchingHistory.find(s => s.id === e.target.value);
@@ -886,7 +886,7 @@ const UserProfile = () => {
                             </div>
 
                             {/* 2. Stats Row (Hits/Misses/Wild) - Just below dropdowns */}
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="p-4 bg-gray-700/30 rounded-lg text-center border border-gray-700">
                                     <p className="text-sm text-gray-400 uppercase">Hits</p>
                                     <p className="text-2xl font-bold text-green-400">{hits} <span className="text-sm text-gray-500">({hitPct}%)</span></p>
@@ -910,15 +910,15 @@ const UserProfile = () => {
                                 {/* Recording Section (Grid + Controls) */}
                                 <div className="flex flex-row items-start justify-center gap-4">
                                     {/* Recording Grid */}
-                                    <div className="flex flex-col items-center">
+                                    <div className="flex flex-col items-center overflow-x-auto">
                                         <h4 className="text-gray-400 font-semibold mb-2 uppercase text-sm">Recording</h4>
                                         <PitchingGrid
                                             counts={visibleGridCounts}
-                                            pitches={filteredPitches} // Pass actual pitch data for precise rendering
+                                            pitches={filteredPitches}
                                             onSquareClick={!isReviewMode ? handleGridClick : undefined}
-                                            onPitchClick={isAdmin && !isReviewMode ? handleDeletePitch : undefined} // Enable deletion
+                                            onPitchClick={isAdmin && !isReviewMode ? handleDeletePitch : undefined}
                                             readOnly={!isAdmin || isReviewMode}
-                                            size="md" // Standard Size
+                                            size="responsive"
                                             targetZones={currentTargetZones}
                                         />
                                         {!isReviewMode && (
@@ -930,41 +930,38 @@ const UserProfile = () => {
 
                                     {/* Session Controls: Undo / Reset (Right of Recording Grid) */}
                                     {isAdmin && !isReviewMode && (
-                                        <div className="flex flex-col gap-4 pt-8 justify-center items-center">
+                                        <div className="flex flex-col gap-2 pt-8 justify-center items-center flex-shrink-0">
                                             <button
                                                 onClick={handleUndo}
                                                 title="Undo Pitch"
-                                                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg border border-gray-600 transition-colors shadow-sm flex items-center gap-2 w-full justify-center"
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg border border-gray-600 transition-colors shadow-sm flex items-center justify-center"
                                             >
-                                                <Undo2 className="w-4 h-4" />
-                                                <span className="text-sm">Undo</span>
+                                                <Undo2 className="w-5 h-5" />
                                             </button>
                                             <button
                                                 onClick={handleResetContext}
                                                 title="Reset Context (Pitch/Target)"
-                                                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-yellow-400 rounded-lg border border-gray-600 transition-colors shadow-sm flex items-center gap-2 w-full justify-center"
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-yellow-400 rounded-lg border border-gray-600 transition-colors shadow-sm flex items-center justify-center"
                                             >
-                                                <RefreshCcw className="w-4 h-4" />
-                                                <span className="text-sm">Reset</span>
+                                                <RefreshCcw className="w-5 h-5" />
                                             </button>
                                             <button
                                                 onClick={handleResetSession}
                                                 title="Reset Full Session"
-                                                className="px-4 py-2 bg-gray-700 hover:bg-red-900/50 text-red-400 rounded-lg border border-gray-600 transition-colors shadow-sm flex items-center gap-2 w-full justify-center"
+                                                className="p-2 bg-gray-700 hover:bg-red-900/50 text-red-400 rounded-lg border border-gray-600 transition-colors shadow-sm flex items-center justify-center"
                                             >
-                                                <Trash2 className="w-4 h-4" />
-                                                <span className="text-sm">Clear</span>
+                                                <Trash2 className="w-5 h-5" />
                                             </button>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* RIGHT: Breakdown Grid */}
-                                <div className="flex flex-col items-center">
+                                <div className="flex flex-col items-center overflow-x-auto">
                                     <h4 className="text-blue-400 font-semibold mb-2 uppercase text-sm">Breakdown</h4>
                                     <PitchingGrid
                                         counts={visibleGridCounts}
-                                        size="md" // Standard Size
+                                        size="responsive"
                                         readOnly={true}
                                         targetZones={currentTargetZones}
                                         renderSquare={(displayId, count) => {
