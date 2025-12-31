@@ -162,5 +162,25 @@ export const dataService = {
         // Check if admin exists in Firestore?
         // With Firebase Auth, we usually seed via script or manual console.
         // We'll leave this empty or use it to seed initial categories if needed.
+    },
+
+    // Pitching Sessions
+    getPitchingSessions: async (userId) => {
+        const q = query(collection(db, 'pitching_sessions'), where("userId", "==", userId));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    },
+
+    savePitchingSession: async (sessionData) => {
+        const docRef = await addDoc(collection(db, 'pitching_sessions'), {
+            ...sessionData,
+            timestamp: new Date().toISOString()
+        });
+        return { id: docRef.id, ...sessionData };
+    },
+
+    deletePitchingSession: async (sessionId) => {
+        await deleteDoc(doc(db, 'pitching_sessions', sessionId));
+        return true;
     }
 };
