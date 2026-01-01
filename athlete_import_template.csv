@@ -1,0 +1,5 @@
+name,email,nickname,team,dob,gender,heightFt,heightIn,weight
+John Smith,john.smith@example.com,Smitty,Varsity,2008-05-15,Male,6,1,185
+Jane Doe,jane.doe@example.com,JD,JV,2009-11-20,Female,5,8,140
+Mike Jones,mike.jones@example.com,Jonesy,Varsity,2007-02-10,Male,5,11,175
+Sarah Wilson,sarah.wilson@example.com,Wilson,JV,2010-08-05,Female,5,6,130
