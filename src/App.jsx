@@ -49,7 +49,12 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 import { useEffect } from 'react';
 
+import { seedAdmin } from './seedAdmin';
+
 function App() {
+  useEffect(() => {
+    seedAdmin();
+  }, []);
   // Warm up GPS on launch
   useEffect(() => {
     let watchId;

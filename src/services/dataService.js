@@ -79,7 +79,7 @@ export const dataService = {
         // 2. Create Firestore Profile
         const newUserProfile = {
             email: userData.email,
-            role: 'USER', // Default role
+            role: userData.role || 'USER',
             name: userData.name,
             nickname: userData.nickname || '',
             team: userData.team || '',
